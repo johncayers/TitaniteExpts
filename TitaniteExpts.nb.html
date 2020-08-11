@@ -1751,13 +1751,15 @@ summary {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuVGl0YW5pdGVFeHB0cyA8LSByZWFkX2NzdihcIlRpdGFuaXRlRXhwdHMuY3N2XCIpXG5cbmBgYCJ9 -->
-<pre class="r"><code>TitaniteExpts &lt;- read_csv(&quot;TitaniteExpts.csv&quot;)
-</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UsIHdhcm4uY29uZmxpY3RzID0gRkFMU0UpXG4jIEltcG9ydCBub3JtYWxpemVkIEVEUyBnbGFzcyBhbmFseXNlc1xuVGl0YW5pdGVFeHB0cyA8LSByZWFkX2NzdihcIlRpdGFuaXRlRXhwdHMuY3N2XCIpXG5gYGAifQ== -->
+<pre class="r"><code>library(tidyverse, warn.conflicts = FALSE)
+# Import normalized EDS glass analyses
+TitaniteExpts &lt;- read_csv(&quot;TitaniteExpts.csv&quot;)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiUGFyc2VkIHdpdGggY29sdW1uIHNwZWNpZmljYXRpb246XG5jb2xzKFxuICBFeHB0ID0gY29sX2NoYXJhY3RlcigpLFxuICBTTSA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgVEMgPSBjb2xfZG91YmxlKCksXG4gIFBrYiA9IGNvbF9kb3VibGUoKSxcbiAgSDJPID0gY29sX2RvdWJsZSgpLFxuICBTaU8yID0gY29sX2RvdWJsZSgpLFxuICBBbDJPMyA9IGNvbF9kb3VibGUoKSxcbiAgTmEyTyA9IGNvbF9kb3VibGUoKSxcbiAgSzJPID0gY29sX2RvdWJsZSgpLFxuICBDYU8gPSBjb2xfZG91YmxlKCksXG4gIEZlTyA9IGNvbF9kb3VibGUoKSxcbiAgTWdPID0gY29sX2RvdWJsZSgpLFxuICBUaU8yID0gY29sX2RvdWJsZSgpLFxuICBNbk8gPSBjb2xfZG91YmxlKCksXG4gIFAyTzUgPSBjb2xfZG91YmxlKClcbilcbiJ9 -->
+<!-- rnb-output-begin eyJkYXRhIjoiUGFyc2VkIHdpdGggY29sdW1uIHNwZWNpZmljYXRpb246XG5jb2xzKFxuICBNb2RlbCA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgRXhwdCA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgU00gPSBjb2xfY2hhcmFjdGVyKCksXG4gIFRDID0gY29sX2RvdWJsZSgpLFxuICBQa2IgPSBjb2xfZG91YmxlKCksXG4gIEgyTyA9IGNvbF9kb3VibGUoKSxcbiAgU2lPMiA9IGNvbF9kb3VibGUoKSxcbiAgQWwyTzMgPSBjb2xfZG91YmxlKCksXG4gIE5hMk8gPSBjb2xfZG91YmxlKCksXG4gIEsyTyA9IGNvbF9kb3VibGUoKSxcbiAgQ2FPID0gY29sX2RvdWJsZSgpLFxuICBGZU8gPSBjb2xfZG91YmxlKCksXG4gIE1nTyA9IGNvbF9kb3VibGUoKSxcbiAgVGlPMiA9IGNvbF9kb3VibGUoKSxcbiAgTW5PID0gY29sX2RvdWJsZSgpLFxuICBQMk81ID0gY29sX2RvdWJsZSgpXG4pXG4ifQ== -->
 <pre><code>Parsed with column specification:
 cols(
+  Model = col_character(),
   Expt = col_character(),
   SM = col_character(),
   TC = col_double(),
@@ -1799,9 +1801,9 @@ cols(
 <p>Add a new chunk by clicking the <em>Insert Chunk</em> button on the toolbar or by pressing <em>Ctrl+Alt+I</em>.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDYWxjdWxhdGUgY2F0aW9uIGZyYWN0aW9uc1xuQ2F0aW9uRnJhY3Rpb25zIDwtIHNlbGVjdChUaXRhbml0ZUNhdGlvbnMsIEV4cHQsIFRDLCBTaTplQ2EsIENhdGlvblN1bSlcbmYgPC0gbWF0Y2goXCJTaVwiLCBuYW1lcyhDYXRpb25GcmFjdGlvbnMpKVxubCA8LSBtYXRjaChcImVDYVwiLCBuYW1lcyhDYXRpb25GcmFjdGlvbnMpKVxuZm9yIChpIGluIGY6bCkge1xuICBDYXRpb25GcmFjdGlvbnNbKGkpXSA9IENhdGlvbkZyYWN0aW9uc1soaSldL0NhdGlvbkZyYWN0aW9ucyRDYXRpb25TdW1cbn1cblxuYGBgIn0= -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDYWxjdWxhdGUgY2F0aW9uIGZyYWN0aW9uc1xuQ2F0aW9uRnJhY3Rpb25zIDwtIHNlbGVjdChUaXRhbml0ZUNhdGlvbnMsIE1vZGVsLCBFeHB0LCBUQywgVGlPMiwgU2k6ZUNhLCBDYXRpb25TdW0pXG5mIDwtIG1hdGNoKFwiU2lcIiwgbmFtZXMoQ2F0aW9uRnJhY3Rpb25zKSlcbmwgPC0gbWF0Y2goXCJlQ2FcIiwgbmFtZXMoQ2F0aW9uRnJhY3Rpb25zKSlcbmZvciAoaSBpbiBmOmwpIHtcbiAgQ2F0aW9uRnJhY3Rpb25zWyhpKV0gPSBDYXRpb25GcmFjdGlvbnNbKGkpXS9DYXRpb25GcmFjdGlvbnMkQ2F0aW9uU3VtXG59XG5cbmBgYCJ9 -->
 <pre class="r"><code># Calculate cation fractions
-CationFractions &lt;- select(TitaniteCations, Expt, TC, Si:eCa, CationSum)
+CationFractions &lt;- select(TitaniteCations, Model, Expt, TC, TiO2, Si:eCa, CationSum)
 f &lt;- match(&quot;Si&quot;, names(CationFractions))
 l &lt;- match(&quot;eCa&quot;, names(CationFractions))
 for (i in f:l) {
@@ -1813,8 +1815,9 @@ for (i in f:l) {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQ2F0aW9uRnJhY3Rpb25zIDwtIENhdGlvbkZyYWN0aW9ucyAlPiVcbiAgbXV0YXRlKFxuICAgIE0gPSAoTmEgKyBLICsgMipDYSkvKFNpKkFsKSxcbiAgICBGTSA9IChOYSArIEsgKyAyKihDYSArIEZlICsgTWcpKS8oU2kqQWwpLFxuICAgIEMgPSAoMTAqZUNhKS8oU2kqQWwpLFxuICAgIEludlRLID0gMS8oVEMrMjczLjE1KVxuICAgIClcbmBgYCJ9 -->
-<pre class="r"><code>CationFractions &lt;- CationFractions %&gt;%
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDYWxjdWxhdGUgbWVsdCBjb21wb3NpdGlvbiBwYXJhbWV0ZXJzXG5DYXRpb25GcmFjdGlvbnMgPC0gQ2F0aW9uRnJhY3Rpb25zICU+JVxuICBtdXRhdGUoXG4gICAgTSA9IChOYSArIEsgKyAyKkNhKS8oU2kqQWwpLFxuICAgIEZNID0gKE5hICsgSyArIDIqKENhICsgRmUgKyBNZykpLyhTaSpBbCksXG4gICAgQyA9ICgxMCplQ2EpLyhTaSpBbCksXG4gICAgSW52VEsgPSAxLyhUQysyNzMuMTUpXG4gICAgKVxuYGBgIn0= -->
+<pre class="r"><code># Calculate melt composition parameters
+CationFractions &lt;- CationFractions %&gt;%
   mutate(
     M = (Na + K + 2*Ca)/(Si*Al),
     FM = (Na + K + 2*(Ca + Fe + Mg))/(Si*Al),
@@ -1825,8 +1828,75 @@ for (i in f:l) {
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBTY2F0dGVycGxvdCBtYXRyaWNlc1xubGlicmFyeShjYXIpXG5zY2F0dGVycGxvdE1hdHJpeCh+IFRpICsgQ2EgKyBBbCArIEludlRLICsgTSArIEZNICsgQywgZGF0YSA9IENhdGlvbkZyYWN0aW9ucywgZ3JvdXBzID0gQ2F0aW9uRnJhY3Rpb25zJE1vZGVsLCBzbW9vdGggPSBGQUxTRSlcbiMgQ29ycmVsYXRpb24gbWF0cml4XG5Db3JyVGVzdCA8LSBzZWxlY3QoQ2F0aW9uRnJhY3Rpb25zLCBUaU8yLCBNOkludlRLKVxuY29yKENvcnJUZXN0KVxuIyBHbGFzcyBUaU8yIGNvbmNlbnRyYXRpb24gaXMgbW9zdCBoaWdobHkgY29ycmVsYXRlZCB3aXRoIG1lbHQgY29tcG9zaXRpb24gcGFyYW1ldGVyIEMuXG5cbmBgYCJ9 -->
+<pre class="r"><code># Scatterplot matrices
+library(car)
+scatterplotMatrix(~ Ti + Ca + Al + InvTK + M + FM + C, data = CationFractions, groups = CationFractions$Model, smooth = FALSE)
+# Correlation matrix
+CorrTest &lt;- select(CationFractions, TiO2, M:InvTK)
+cor(CorrTest)
+# Glass TiO2 concentration is most highly correlated with melt composition parameter C.
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZml0IDwtIGxtKFRpTzIgfiBDICsgSW52VEssIGRhdGEgPSBDYXRpb25GcmFjdGlvbnMpXG5zdW1tYXJ5KGZpdClcbnBsb3QoZml0KVxuXG5gYGAifQ== -->
+<pre class="r"><code>fit &lt;- lm(TiO2 ~ C + InvTK, data = CationFractions)
+summary(fit)
+plot(fit)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBFeHBlcmltZW50cyAyOSwgMzAgJiAzMSBhcmUgaWRlbnRpZmllZCBhcyBvdXRsaWVycy4gVGhleSB3ZXJlIERhbm55J3MgZWFybGllc3QgZXhwZXJpbWVudHMsIGFuZCB3ZXJlIGFsbCBydW4gYXQgMTMwMEMuXG5cblJlZ01vZGVsIDwtIHNlbGVjdChDYXRpb25GcmFjdGlvbnMsIE1vZGVsLCBFeHB0LCBUaU8yLCBJbnZUSywgQylcblJlZ01vZGVsIDwtIHNsaWNlKFJlZ01vZGVsLCAtKDI5OjMxKSlcbmZpdCA8LSBsbShUaU8yIH4gQyArIEludlRLLCBkYXRhID0gUmVnTW9kZWwpXG5zdW1tYXJ5KGZpdClcbnBsb3QoZml0KVxuXG5gYGAifQ== -->
+<pre class="r"><code># Experiments 29, 30 &amp; 31 are identified as outliers. They were Danny&#39;s earliest experiments, and were all run at 1300C.
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlRpdGFuaXRlIHNvbHViaWxpdHkgZXhwZXJpbWVudHM6IEFuYWx5c2lzIG9mIEVEUyBkYXRhIg0Kb3V0cHV0OiBodG1sX25vdGVib29rDQotLS0NCg0KYGBge3J9DQpsaWJyYXJ5KHRpZHl2ZXJzZSwgd2Fybi5jb25mbGljdHMgPSBGQUxTRSkNCiMgSW1wb3J0IG5vcm1hbGl6ZWQgRURTIGdsYXNzIGFuYWx5c2VzDQpUaXRhbml0ZUV4cHRzIDwtIHJlYWRfY3N2KCJUaXRhbml0ZUV4cHRzLmNzdiIpDQpgYGANCmBgYHtyfQ0KVGl0YW5pdGVDYXRpb25zIDwtIFRpdGFuaXRlRXhwdHMgJT4lDQogIG11dGF0ZSgNCiAgICBTaSA9IFNpTzIvNjAuMDg0OCwNCiAgICBBbCA9IDIqQWwyTzMvMTAxLjk2MSwNCiAgICBOYSA9IDIqTmEyTy82MS45NzksDQogICAgSyA9IDIqSzJPLzk0LjE5NCwNCiAgICBDYSA9IENhTy81Ni4wNzk0LA0KICAgIEZlID0gRmVPLzcxLjg0NjQsDQogICAgTWcgPSBNZ08vNDAuMzA0NCwNCiAgICBUaSA9IFRpTzIvNzkuODk4OCwNCiAgICBNbiA9IE1uTy83MC45Mzc0LA0KICAgIFAgPSAyKlAyTzUvMTQxLjk0NSwNCiAgICBlQ2EgPSAoQ2FPLzU2LjA3OTQgLSBBbDJPMy8xMDEuOTYxICsgSzJPLzk0LjE5NCArIE5hMk8vNjEuOTc5KSwNCiAgICBDYXRpb25TdW0gPSAoU2kgKyBBbCArIE5hICsgSyArIENhICsgRmUgKyBNZyArIFRpICsgTW4gKyBQKQ0KICAgICAgICAgICAgICkNCmBgYA0KDQpBZGQgYSBuZXcgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpJbnNlcnQgQ2h1bmsqIGJ1dHRvbiBvbiB0aGUgdG9vbGJhciBvciBieSBwcmVzc2luZyAqQ3RybCtBbHQrSSouDQpgYGB7cn0NCiMgQ2FsY3VsYXRlIGNhdGlvbiBmcmFjdGlvbnMNCkNhdGlvbkZyYWN0aW9ucyA8LSBzZWxlY3QoVGl0YW5pdGVDYXRpb25zLCBFeHB0LCBUQywgU2k6ZUNhLCBDYXRpb25TdW0pDQpmIDwtIG1hdGNoKCJTaSIsIG5hbWVzKENhdGlvbkZyYWN0aW9ucykpDQpsIDwtIG1hdGNoKCJlQ2EiLCBuYW1lcyhDYXRpb25GcmFjdGlvbnMpKQ0KZm9yIChpIGluIGY6bCkgew0KICBDYXRpb25GcmFjdGlvbnNbKGkpXSA9IENhdGlvbkZyYWN0aW9uc1soaSldL0NhdGlvbkZyYWN0aW9ucyRDYXRpb25TdW0NCn0NCg0KYGBgDQoNCg0KYGBge3J9DQpDYXRpb25GcmFjdGlvbnMgPC0gQ2F0aW9uRnJhY3Rpb25zICU+JQ0KICBtdXRhdGUoDQogICAgTSA9IChOYSArIEsgKyAyKkNhKS8oU2kqQWwpLA0KICAgIEZNID0gKE5hICsgSyArIDIqKENhICsgRmUgKyBNZykpLyhTaSpBbCksDQogICAgQyA9ICgxMCplQ2EpLyhTaSpBbCksDQogICAgSW52VEsgPSAxLyhUQysyNzMuMTUpDQogICAgKQ0KYGBgDQoNCg0K</div>
+RegModel &lt;- select(CationFractions, Model, Expt, TiO2, InvTK, C)
+RegModel &lt;- slice(RegModel, -(29:31))
+fit &lt;- lm(TiO2 ~ C + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBUcnkgZmlsdGVyaW5nIG91dCBleHBlcmltZW50cyB3aXRoIE1vZGVsID0gXCJOXCJcblJlZ01vZGVsIDwtIHNlbGVjdChDYXRpb25GcmFjdGlvbnMsIE1vZGVsLCBFeHB0LCBUaU8yLCBJbnZUSywgQylcblJlZ01vZGVsIDwtIGZpbHRlcihSZWdNb2RlbCwgTW9kZWwgPT0gXCJZXCIpXG5maXQgPC0gbG0oVGlPMiB+IEMgKyBJbnZUSywgZGF0YSA9IFJlZ01vZGVsKVxuc3VtbWFyeShmaXQpXG5wbG90KGZpdClcbiMgNiBmZXdlciBleHBlcmltZW50cyBpbmNyZWFzZXMgcl4yIHRvIDAuOThcbmBgYCJ9 -->
+<pre class="r"><code># Try filtering out experiments with Model = &quot;N&quot;
+RegModel &lt;- select(CationFractions, Model, Expt, TiO2, InvTK, C)
+RegModel &lt;- filter(RegModel, Model == &quot;Y&quot;)
+fit &lt;- lm(TiO2 ~ C + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+# 6 fewer experiments increases r^2 to 0.98</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<pre><code>
+
+&lt;!-- rnb-text-end --&gt;
+
+
+&lt;!-- rnb-chunk-begin --&gt;
+
+
+&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBVc2UgbGVhcHMgcGFja2FnZSBmb3IgcmVndWxhciBzdWJzZXRzIHJlZ3Jlc3Npb25cbmxpYnJhcnkobGVhcHMpXG5sZWFwcyA8LSByZWdzdWJzZXRzKFRpTzIgfiBJbnZUSyArIE0gKyBGTSArIEMsIGRhdGEgPSBDYXRpb25GcmFjdGlvbnMsIG5iZXN0ID0gMilcbnBsb3QobGVhcHMsIHNjYWxlID0gXCJhZGpyMlwiKVxuYGBgIn0= --&gt;
+
+```r
+# Use leaps package for regular subsets regression
+library(leaps)
+leaps &lt;- regsubsets(TiO2 ~ InvTK + M + FM + C, data = CationFractions, nbest = 2)
+plot(leaps, scale = &quot;adjr2&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIlRpdGFuaXRlIHNvbHViaWxpdHkgZXhwZXJpbWVudHM6IEFuYWx5c2lzIG9mIEVEUyBkYXRhIg0Kb3V0cHV0OiBodG1sX25vdGVib29rDQotLS0NCg0KYGBge3J9DQpsaWJyYXJ5KHRpZHl2ZXJzZSwgd2Fybi5jb25mbGljdHMgPSBGQUxTRSkNCiMgSW1wb3J0IG5vcm1hbGl6ZWQgRURTIGdsYXNzIGFuYWx5c2VzDQpUaXRhbml0ZUV4cHRzIDwtIHJlYWRfY3N2KCJUaXRhbml0ZUV4cHRzLmNzdiIpDQpgYGANCmBgYHtyfQ0KVGl0YW5pdGVDYXRpb25zIDwtIFRpdGFuaXRlRXhwdHMgJT4lDQogIG11dGF0ZSgNCiAgICBTaSA9IFNpTzIvNjAuMDg0OCwNCiAgICBBbCA9IDIqQWwyTzMvMTAxLjk2MSwNCiAgICBOYSA9IDIqTmEyTy82MS45NzksDQogICAgSyA9IDIqSzJPLzk0LjE5NCwNCiAgICBDYSA9IENhTy81Ni4wNzk0LA0KICAgIEZlID0gRmVPLzcxLjg0NjQsDQogICAgTWcgPSBNZ08vNDAuMzA0NCwNCiAgICBUaSA9IFRpTzIvNzkuODk4OCwNCiAgICBNbiA9IE1uTy83MC45Mzc0LA0KICAgIFAgPSAyKlAyTzUvMTQxLjk0NSwNCiAgICBlQ2EgPSAoQ2FPLzU2LjA3OTQgLSBBbDJPMy8xMDEuOTYxICsgSzJPLzk0LjE5NCArIE5hMk8vNjEuOTc5KSwNCiAgICBDYXRpb25TdW0gPSAoU2kgKyBBbCArIE5hICsgSyArIENhICsgRmUgKyBNZyArIFRpICsgTW4gKyBQKQ0KICAgICAgICAgICAgICkNCmBgYA0KDQpBZGQgYSBuZXcgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpJbnNlcnQgQ2h1bmsqIGJ1dHRvbiBvbiB0aGUgdG9vbGJhciBvciBieSBwcmVzc2luZyAqQ3RybCtBbHQrSSouDQpgYGB7cn0NCiMgQ2FsY3VsYXRlIGNhdGlvbiBmcmFjdGlvbnMNCkNhdGlvbkZyYWN0aW9ucyA8LSBzZWxlY3QoVGl0YW5pdGVDYXRpb25zLCBNb2RlbCwgRXhwdCwgVEMsIFRpTzIsIFNpOmVDYSwgQ2F0aW9uU3VtKQ0KZiA8LSBtYXRjaCgiU2kiLCBuYW1lcyhDYXRpb25GcmFjdGlvbnMpKQ0KbCA8LSBtYXRjaCgiZUNhIiwgbmFtZXMoQ2F0aW9uRnJhY3Rpb25zKSkNCmZvciAoaSBpbiBmOmwpIHsNCiAgQ2F0aW9uRnJhY3Rpb25zWyhpKV0gPSBDYXRpb25GcmFjdGlvbnNbKGkpXS9DYXRpb25GcmFjdGlvbnMkQ2F0aW9uU3VtDQp9DQoNCmBgYA0KDQoNCmBgYHtyfQ0KIyBDYWxjdWxhdGUgbWVsdCBjb21wb3NpdGlvbiBwYXJhbWV0ZXJzDQpDYXRpb25GcmFjdGlvbnMgPC0gQ2F0aW9uRnJhY3Rpb25zICU+JQ0KICBtdXRhdGUoDQogICAgTSA9IChOYSArIEsgKyAyKkNhKS8oU2kqQWwpLA0KICAgIEZNID0gKE5hICsgSyArIDIqKENhICsgRmUgKyBNZykpLyhTaSpBbCksDQogICAgQyA9ICgxMCplQ2EpLyhTaSpBbCksDQogICAgSW52VEsgPSAxLyhUQysyNzMuMTUpDQogICAgKQ0KYGBgDQoNCg0KYGBge3J9DQojIFNjYXR0ZXJwbG90IG1hdHJpY2VzDQpsaWJyYXJ5KGNhcikNCnNjYXR0ZXJwbG90TWF0cml4KH4gVGkgKyBDYSArIEFsICsgSW52VEsgKyBNICsgRk0gKyBDLCBkYXRhID0gQ2F0aW9uRnJhY3Rpb25zLCBncm91cHMgPSBDYXRpb25GcmFjdGlvbnMkTW9kZWwsIHNtb290aCA9IEZBTFNFKQ0KIyBDb3JyZWxhdGlvbiBtYXRyaXgNCkNvcnJUZXN0IDwtIHNlbGVjdChDYXRpb25GcmFjdGlvbnMsIFRpTzIsIE06SW52VEspDQpjb3IoQ29yclRlc3QpDQojIEdsYXNzIFRpTzIgY29uY2VudHJhdGlvbiBpcyBtb3N0IGhpZ2hseSBjb3JyZWxhdGVkIHdpdGggbWVsdCBjb21wb3NpdGlvbiBwYXJhbWV0ZXIgQy4NCg0KYGBgDQoNCmBgYHtyfQ0KZml0IDwtIGxtKFRpTzIgfiBDICsgSW52VEssIGRhdGEgPSBDYXRpb25GcmFjdGlvbnMpDQpzdW1tYXJ5KGZpdCkNCnBsb3QoZml0KQ0KDQpgYGANCg0KYGBge3J9DQojIEV4cGVyaW1lbnRzIDI5LCAzMCAmIDMxIGFyZSBpZGVudGlmaWVkIGFzIG91dGxpZXJzLiBUaGV5IHdlcmUgRGFubnkncyBlYXJsaWVzdCBleHBlcmltZW50cywgYW5kIHdlcmUgYWxsIHJ1biBhdCAxMzAwQy4NCg0KUmVnTW9kZWwgPC0gc2VsZWN0KENhdGlvbkZyYWN0aW9ucywgTW9kZWwsIEV4cHQsIFRpTzIsIEludlRLLCBDKQ0KUmVnTW9kZWwgPC0gc2xpY2UoUmVnTW9kZWwsIC0oMjk6MzEpKQ0KZml0IDwtIGxtKFRpTzIgfiBDICsgSW52VEssIGRhdGEgPSBSZWdNb2RlbCkNCnN1bW1hcnkoZml0KQ0KcGxvdChmaXQpDQoNCmBgYA0KDQpgYGB7cn0NCiMgVHJ5IGZpbHRlcmluZyBvdXQgZXhwZXJpbWVudHMgd2l0aCBNb2RlbCA9ICJOIg0KUmVnTW9kZWwgPC0gc2VsZWN0KENhdGlvbkZyYWN0aW9ucywgTW9kZWwsIEV4cHQsIFRpTzIsIEludlRLLCBDKQ0KUmVnTW9kZWwgPC0gZmlsdGVyKFJlZ01vZGVsLCBNb2RlbCA9PSAiWSIpDQpmaXQgPC0gbG0oVGlPMiB+IEMgKyBJbnZUSywgZGF0YSA9IFJlZ01vZGVsKQ0Kc3VtbWFyeShmaXQpDQpwbG90KGZpdCkNCiMgNiBmZXdlciBleHBlcmltZW50cyBpbmNyZWFzZXMgcl4yIHRvIDAuOTgNCmBgYA0KDQoNCmBgYA0KDQpgYGB7cn0NCiMgVXNlIGxlYXBzIHBhY2thZ2UgZm9yIHJlZ3VsYXIgc3Vic2V0cyByZWdyZXNzaW9uDQpsaWJyYXJ5KGxlYXBzKQ0KbGVhcHMgPC0gcmVnc3Vic2V0cyhUaU8yIH4gSW52VEsgKyBNICsgRk0gKyBDLCBkYXRhID0gQ2F0aW9uRnJhY3Rpb25zLCBuYmVzdCA9IDIpDQpwbG90KGxlYXBzLCBzY2FsZSA9ICJhZGpyMiIpDQo=</div>
 
 
 

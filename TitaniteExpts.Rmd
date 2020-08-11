@@ -29,7 +29,7 @@ TitaniteCations <- TitaniteExpts %>%
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 ```{r}
 # Calculate cation fractions
-CationFractions <- select(TitaniteCations, Expt, TC, Si:eCa, CationSum)
+CationFractions <- select(TitaniteCations, Model, Expt, TC, TiO2, Si:eCa, CationSum)
 f <- match("Si", names(CationFractions))
 l <- match("eCa", names(CationFractions))
 for (i in f:l) {
@@ -40,6 +40,7 @@ for (i in f:l) {
 
 
 ```{r}
+# Calculate melt composition parameters
 CationFractions <- CationFractions %>%
   mutate(
     M = (Na + K + 2*Ca)/(Si*Al),
@@ -50,3 +51,50 @@ CationFractions <- CationFractions %>%
 ```
 
 
+```{r}
+# Scatterplot matrices
+library(car)
+scatterplotMatrix(~ Ti + Ca + Al + InvTK + M + FM + C, data = CationFractions, groups = CationFractions$Model, smooth = FALSE)
+# Correlation matrix
+CorrTest <- select(CationFractions, TiO2, M:InvTK)
+cor(CorrTest)
+# Glass TiO2 concentration is most highly correlated with melt composition parameter C.
+
+```
+
+```{r}
+fit <- lm(TiO2 ~ C + InvTK, data = CationFractions)
+summary(fit)
+plot(fit)
+
+```
+
+```{r}
+# Experiments 29, 30 & 31 are identified as outliers. They were Danny's earliest experiments, and were all run at 1300C.
+
+RegModel <- select(CationFractions, Model, Expt, TiO2, InvTK, C)
+RegModel <- slice(RegModel, -(29:31))
+fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+
+```
+
+```{r}
+# Try filtering out experiments with Model = "N"
+RegModel <- select(CationFractions, Model, Expt, TiO2, InvTK, C)
+RegModel <- filter(RegModel, Model == "Y")
+fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+# 6 fewer experiments increases r^2 to 0.98
+```
+
+
+```
+
+```{r}
+# Use leaps package for regular subsets regression
+library(leaps)
+leaps <- regsubsets(TiO2 ~ InvTK + M + FM + C, data = CationFractions, nbest = 2)
+plot(leaps, scale = "adjr2")
