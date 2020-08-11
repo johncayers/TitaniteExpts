@@ -1,0 +1,53 @@
+---
+title: "Titanite solubility experiments: Analysis of EDS data"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse, warn.conflicts = FALSE)
+# Import normalized EDS glass analyses
+TitaniteExpts <- read_csv("TitaniteExpts.csv")
+```
+```{r}
+TitaniteCations <- TitaniteExpts %>%
+  mutate(
+    Si = SiO2/60.0848,
+    Al = 2*Al2O3/101.961,
+    Na = 2*Na2O/61.979,
+    K = 2*K2O/94.194,
+    Ca = CaO/56.0794,
+    Fe = FeO/71.8464,
+    Mg = MgO/40.3044,
+    Ti = TiO2/79.8988,
+    Mn = MnO/70.9374,
+    P = 2*P2O5/141.945,
+    eCa = (CaO/56.0794 - Al2O3/101.961 + K2O/94.194 + Na2O/61.979),
+    CationSum = (Si + Al + Na + K + Ca + Fe + Mg + Ti + Mn + P)
+             )
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+```{r}
+# Calculate cation fractions
+CationFractions <- select(TitaniteCations, Expt, TC, Si:eCa, CationSum)
+f <- match("Si", names(CationFractions))
+l <- match("eCa", names(CationFractions))
+for (i in f:l) {
+  CationFractions[(i)] = CationFractions[(i)]/CationFractions$CationSum
+}
+
+```
+
+
+```{r}
+CationFractions <- CationFractions %>%
+  mutate(
+    M = (Na + K + 2*Ca)/(Si*Al),
+    FM = (Na + K + 2*(Ca + Fe + Mg))/(Si*Al),
+    C = (10*eCa)/(Si*Al),
+    InvTK = 1/(TC+273.15)
+    )
+```
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
