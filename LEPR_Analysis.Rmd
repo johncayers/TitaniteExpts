@@ -1,7 +1,9 @@
 ---
-title: "Titanite solubility experiments: Analysis of EDS data"
-author: John C. Ayers
-output: html_notebook
+title: 'Titanite solubility experiments: Analysis of EDS data'
+author: "John C. Ayers"
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r}
