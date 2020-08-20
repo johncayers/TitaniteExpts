@@ -1,10 +1,14 @@
 ---
-title: "Titanite solubility experiments: Analysis of EDS data"
-output: html_notebook
+title: 'Titanite solubility experiments: Analysis of EDS data'
+author: "John C. Ayers"
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r}
 library(tidyverse, warn.conflicts = FALSE)
+setwd("C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/DataAnalysis/TitaniteExpts")
 # Import normalized EDS glass analyses
 TitaniteExpts <- read_csv("TitaniteExpts.csv")
 ```
@@ -26,10 +30,9 @@ TitaniteCations <- TitaniteExpts %>%
              )
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 ```{r}
 # Calculate cation fractions
-CationFractions <- select(TitaniteCations, Model, Expt, TC, TiO2, Si:eCa, CationSum)
+CationFractions <- select(TitaniteCations, Model, Expt, SM, TC, Pkb, H2O, TiO2, Si:eCa, CationSum)
 f <- match("Si", names(CationFractions))
 l <- match("eCa", names(CationFractions))
 for (i in f:l) {
@@ -81,6 +84,16 @@ plot(fit)
 ```
 
 ```{r}
+# Experiments in rows 28, 29 are outliers.
+RegModel <- slice(RegModel, -(28:29))
+fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+# I think this is our best model. Removing more experiments doesn't significantly improve fit.
+write.csv(RegModel, "ExptsInModel.csv")
+```
+
+```{r}
 # Try filtering out experiments with Model = "N"
 RegModel <- select(CationFractions, Model, Expt, TiO2, InvTK, C)
 RegModel <- filter(RegModel, Model == "Y")
@@ -89,12 +102,18 @@ summary(fit)
 plot(fit)
 # 6 fewer experiments increases r^2 to 0.98
 ```
-
-
+```{r}
+# Calculate model TiO2 concentrations and errors
+CationFractions <- CationFractions %>%
+  mutate(
+   ModelTiO2 = (0.79*C - 7996*InvTK + 7.888),
+   ModelTiO2SD = ModelTiO2*sqrt((0.03514/0.79)^2 + (1243/7996)^2)
+  )
 ```
 
 ```{r}
-# Use leaps package for regular subsets regression
-library(leaps)
-leaps <- regsubsets(TiO2 ~ InvTK + M + FM + C, data = CationFractions, nbest = 2)
-plot(leaps, scale = "adjr2")
+# Create model output table
+TiO2ModelTable <- select(CationFractions, Model, Expt, eCa, C, InvTK, TiO2, ModelTiO2, ModelTiO2SD)
+write.csv(TiO2ModelTable, file = "TiO2ModelTable.csv")
+```
+

@@ -1,0 +1,65 @@
+---
+title: "Titanite solubility experiments: Analysis of EDS data"
+author: John C. Ayers
+output: html_notebook
+---
+
+```{r}
+library(tidyverse, warn.conflicts = FALSE)
+setwd("C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/DataAnalysis/TitaniteExpts")
+# Import normalized EDS glass analyses
+TitaniteExpts <- read_csv("LEPR_Titanite.csv")
+```
+
+
+```{r}
+TitaniteCations <- TitaniteExpts %>%
+  mutate(
+    Si = SiO2/60.0848,
+    Al = 2*Al2O3/101.961,
+    Na = 2*Na2O/61.979,
+    K = 2*K2O/94.194,
+    Ca = CaO/56.0794,
+    Fe = FeO/71.8464,
+    Mg = MgO/40.3044,
+    Ti = TiO2/79.8988,
+    eCa = (CaO/56.0794 - Al2O3/101.961 + K2O/94.194 + Na2O/61.979),
+    CationSum = (Si + Al + Na + K + Ca + Fe + Mg + Ti)
+     )
+```
+
+```{r}
+# Calculate cation fractions
+CationFractions <- select(TitaniteCations, Expt, TC, TiO2, Si:eCa, CationSum)
+f <- match("Si", names(CationFractions))
+l <- match("eCa", names(CationFractions))
+for (i in f:l) {
+  CationFractions[(i)] = CationFractions[(i)]/CationFractions$CationSum
+}
+
+```
+
+
+```{r}
+# Calculate melt composition parameters & TiO2 saturation concentration
+CationFractions <- CationFractions %>%
+  mutate(
+    M = (Na + K + 2*Ca)/(Si*Al),
+    FM = (Na + K + 2*(Ca + Fe + Mg))/(Si*Al),
+    C = (10*eCa)/(Si*Al),
+    InvTK = 1/(TC+273.15),
+    TiO2Sat = (0.79*C - 7993*InvTK + 7.89)
+    )
+```
+
+
+```{r}
+# Calculate TiO2 saturation concentration
+CationFractions <- CationFractions %>%
+  mutate(
+    TiO2sat <- (0.79*C - 7993*InvTK + 7.89)
+  )
+# Plot TiO2sat on x-axis and TiO2 on y-axis.
+# Ideally all points should fall on a 1:1 line
+qplot(CationFractions$TiO2sat, CationFractions$TiO2)
+```

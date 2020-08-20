@@ -1753,15 +1753,35 @@ summary {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UsIHdhcm4uY29uZmxpY3RzID0gRkFMU0UpXG5zZXR3ZChcIkM6L1VzZXJzL2F5ZXJzai9PbmVEcml2ZSAtIFZhbmRlcmJpbHQvUGFwZXJzL1NwaGVuZVNvbHViaWxpdHkvRGF0YUFuYWx5c2lzL1RpdGFuaXRlRXhwdHNcIilcbiMgSW1wb3J0IG5vcm1hbGl6ZWQgRURTIGdsYXNzIGFuYWx5c2VzXG5UaXRhbml0ZUV4cHRzIDwtIHJlYWRfY3N2KFwiVGl0YW5pdGVFeHB0cy5jc3ZcIilcbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UsIHdhcm4uY29uZmxpY3RzID0gRkFMU0UpXG5zZXR3ZChcIkM6L1VzZXJzL2F5ZXJzai9PbmVEcml2ZSAtIFZhbmRlcmJpbHQvUGFwZXJzL1NwaGVuZVNvbHViaWxpdHkvRGF0YUFuYWx5c2lzL1RpdGFuaXRlRXhwdHNcIilcbiMgSW1wb3J0IG5vcm1hbGl6ZWQgRURTIGdsYXNzIGFuYWx5c2VzXG5UaXRhbml0ZUV4cHRzIDwtIHJlYWRfY3N2KFwiTEVQUl9UaXRhbml0ZS5jc3ZcIilcbmBgYCJ9 -->
 <pre class="r"><code>library(tidyverse, warn.conflicts = FALSE)
 setwd(&quot;C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/DataAnalysis/TitaniteExpts&quot;)
 # Import normalized EDS glass analyses
-TitaniteExpts &lt;- read_csv(&quot;TitaniteExpts.csv&quot;)</code></pre>
+TitaniteExpts &lt;- read_csv(&quot;LEPR_Titanite.csv&quot;)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUGFyc2VkIHdpdGggY29sdW1uIHNwZWNpZmljYXRpb246XG5jb2xzKFxuICBJbmRleCA9IGNvbF9kb3VibGUoKSxcbiAgRXhwdCA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgVEMgPSBjb2xfZG91YmxlKCksXG4gIFBrYiA9IGNvbF9kb3VibGUoKSxcbiAgZk8yID0gY29sX2NoYXJhY3RlcigpLFxuICBTaU8yID0gY29sX2RvdWJsZSgpLFxuICBBbDJPMyA9IGNvbF9kb3VibGUoKSxcbiAgTmEyTyA9IGNvbF9kb3VibGUoKSxcbiAgSzJPID0gY29sX2RvdWJsZSgpLFxuICBDYU8gPSBjb2xfZG91YmxlKCksXG4gIEZlTyA9IGNvbF9kb3VibGUoKSxcbiAgTWdPID0gY29sX2RvdWJsZSgpLFxuICBUaU8yID0gY29sX2RvdWJsZSgpXG4pXG4ifQ== -->
+<pre><code>Parsed with column specification:
+cols(
+  Index = col_double(),
+  Expt = col_character(),
+  TC = col_double(),
+  Pkb = col_double(),
+  fO2 = col_character(),
+  SiO2 = col_double(),
+  Al2O3 = col_double(),
+  Na2O = col_double(),
+  K2O = col_double(),
+  CaO = col_double(),
+  FeO = col_double(),
+  MgO = col_double(),
+  TiO2 = col_double()
+)</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuVGl0YW5pdGVDYXRpb25zIDwtIFRpdGFuaXRlRXhwdHMgJT4lXG4gIG11dGF0ZShcbiAgICBTaSA9IFNpTzIvNjAuMDg0OCxcbiAgICBBbCA9IDIqQWwyTzMvMTAxLjk2MSxcbiAgICBOYSA9IDIqTmEyTy82MS45NzksXG4gICAgSyA9IDIqSzJPLzk0LjE5NCxcbiAgICBDYSA9IENhTy81Ni4wNzk0LFxuICAgIEZlID0gRmVPLzcxLjg0NjQsXG4gICAgTWcgPSBNZ08vNDAuMzA0NCxcbiAgICBUaSA9IFRpTzIvNzkuODk4OCxcbiAgICBNbiA9IE1uTy83MC45Mzc0LFxuICAgIFAgPSAyKlAyTzUvMTQxLjk0NSxcbiAgICBlQ2EgPSAoQ2FPLzU2LjA3OTQgLSBBbDJPMy8xMDEuOTYxICsgSzJPLzk0LjE5NCArIE5hMk8vNjEuOTc5KSxcbiAgICBDYXRpb25TdW0gPSAoU2kgKyBBbCArIE5hICsgSyArIENhICsgRmUgKyBNZyArIFRpICsgTW4gKyBQKVxuICAgICAgICAgICAgIClcbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuVGl0YW5pdGVDYXRpb25zIDwtIFRpdGFuaXRlRXhwdHMgJT4lXG4gIG11dGF0ZShcbiAgICBTaSA9IFNpTzIvNjAuMDg0OCxcbiAgICBBbCA9IDIqQWwyTzMvMTAxLjk2MSxcbiAgICBOYSA9IDIqTmEyTy82MS45NzksXG4gICAgSyA9IDIqSzJPLzk0LjE5NCxcbiAgICBDYSA9IENhTy81Ni4wNzk0LFxuICAgIEZlID0gRmVPLzcxLjg0NjQsXG4gICAgTWcgPSBNZ08vNDAuMzA0NCxcbiAgICBUaSA9IFRpTzIvNzkuODk4OCxcbiAgICBlQ2EgPSAoQ2FPLzU2LjA3OTQgLSBBbDJPMy8xMDEuOTYxICsgSzJPLzk0LjE5NCArIE5hMk8vNjEuOTc5KSxcbiAgICBDYXRpb25TdW0gPSAoU2kgKyBBbCArIE5hICsgSyArIENhICsgRmUgKyBNZyArIFRpKVxuICAgICApXG4jIFRpdGFuaXRlQ2F0aW9ucyRDYXRpb25TdW0gPSBzdW0oVGl0YW5pdGVDYXRpb25zWywxNToyMl0sIG5hLnJtID0gVFJVRSlcbiMgVGl0YW5pdGVDYXRpb25zICU+JVxuIyAgIG11dGF0ZShDYXRpb25TdW0gPSBzZWxlY3QoLiwgU2k6VGkpICU+JVxuIyAgICAgICAgICAgIHJvd1N1bXMobmEucm0gPSBUUlVFKSlcblxuYGBgIn0= -->
 <pre class="r"><code>TitaniteCations &lt;- TitaniteExpts %&gt;%
   mutate(
     Si = SiO2/60.0848,
@@ -1772,19 +1792,22 @@ TitaniteExpts &lt;- read_csv(&quot;TitaniteExpts.csv&quot;)</code></pre>
     Fe = FeO/71.8464,
     Mg = MgO/40.3044,
     Ti = TiO2/79.8988,
-    Mn = MnO/70.9374,
-    P = 2*P2O5/141.945,
     eCa = (CaO/56.0794 - Al2O3/101.961 + K2O/94.194 + Na2O/61.979),
-    CationSum = (Si + Al + Na + K + Ca + Fe + Mg + Ti + Mn + P)
-             )</code></pre>
+    CationSum = (Si + Al + Na + K + Ca + Fe + Mg + Ti)
+     )
+# TitaniteCations$CationSum = sum(TitaniteCations[,15:22], na.rm = TRUE)
+# TitaniteCations %&gt;%
+#   mutate(CationSum = select(., Si:Ti) %&gt;%
+#            rowSums(na.rm = TRUE))
+</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDYWxjdWxhdGUgY2F0aW9uIGZyYWN0aW9uc1xuQ2F0aW9uRnJhY3Rpb25zIDwtIHNlbGVjdChUaXRhbml0ZUNhdGlvbnMsIE1vZGVsLCBFeHB0LCBUQywgVGlPMiwgU2k6ZUNhLCBDYXRpb25TdW0pXG5mIDwtIG1hdGNoKFwiU2lcIiwgbmFtZXMoQ2F0aW9uRnJhY3Rpb25zKSlcbmwgPC0gbWF0Y2goXCJlQ2FcIiwgbmFtZXMoQ2F0aW9uRnJhY3Rpb25zKSlcbmZvciAoaSBpbiBmOmwpIHtcbiAgQ2F0aW9uRnJhY3Rpb25zWyhpKV0gPSBDYXRpb25GcmFjdGlvbnNbKGkpXS9DYXRpb25GcmFjdGlvbnMkQ2F0aW9uU3VtXG59XG5cbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDYWxjdWxhdGUgY2F0aW9uIGZyYWN0aW9uc1xuQ2F0aW9uRnJhY3Rpb25zIDwtIHNlbGVjdChUaXRhbml0ZUNhdGlvbnMsIEV4cHQsIFRDLCBUaU8yLCBTaTplQ2EsIENhdGlvblN1bSlcbmYgPC0gbWF0Y2goXCJTaVwiLCBuYW1lcyhDYXRpb25GcmFjdGlvbnMpKVxubCA8LSBtYXRjaChcImVDYVwiLCBuYW1lcyhDYXRpb25GcmFjdGlvbnMpKVxuZm9yIChpIGluIGY6bCkge1xuICBDYXRpb25GcmFjdGlvbnNbKGkpXSA9IENhdGlvbkZyYWN0aW9uc1soaSldL0NhdGlvbkZyYWN0aW9ucyRDYXRpb25TdW1cbn1cblxuYGBgIn0= -->
 <pre class="r"><code># Calculate cation fractions
-CationFractions &lt;- select(TitaniteCations, Model, Expt, TC, TiO2, Si:eCa, CationSum)
+CationFractions &lt;- select(TitaniteCations, Expt, TC, TiO2, Si:eCa, CationSum)
 f &lt;- match(&quot;Si&quot;, names(CationFractions))
 l &lt;- match(&quot;eCa&quot;, names(CationFractions))
 for (i in f:l) {
@@ -1796,81 +1819,40 @@ for (i in f:l) {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDYWxjdWxhdGUgbWVsdCBjb21wb3NpdGlvbiBwYXJhbWV0ZXJzXG5DYXRpb25GcmFjdGlvbnMgPC0gQ2F0aW9uRnJhY3Rpb25zICU+JVxuICBtdXRhdGUoXG4gICAgTSA9IChOYSArIEsgKyAyKkNhKS8oU2kqQWwpLFxuICAgIEZNID0gKE5hICsgSyArIDIqKENhICsgRmUgKyBNZykpLyhTaSpBbCksXG4gICAgQyA9ICgxMCplQ2EpLyhTaSpBbCksXG4gICAgSW52VEsgPSAxLyhUQysyNzMuMTUpXG4gICAgKVxuYGBgIn0= -->
-<pre class="r"><code># Calculate melt composition parameters
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDYWxjdWxhdGUgbWVsdCBjb21wb3NpdGlvbiBwYXJhbWV0ZXJzICYgVGlPMiBzYXR1cmF0aW9uIGNvbmNlbnRyYXRpb25cbkNhdGlvbkZyYWN0aW9ucyA8LSBDYXRpb25GcmFjdGlvbnMgJT4lXG4gIG11dGF0ZShcbiAgICBNID0gKE5hICsgSyArIDIqQ2EpLyhTaSpBbCksXG4gICAgRk0gPSAoTmEgKyBLICsgMiooQ2EgKyBGZSArIE1nKSkvKFNpKkFsKSxcbiAgICBDID0gKDEwKmVDYSkvKFNpKkFsKSxcbiAgICBJbnZUSyA9IDEvKFRDKzI3My4xNSksXG4gICAgVGlPMlNhdCA9ICgwLjc5KkMgLSA3OTkzKkludlRLICsgNy44OSlcbiAgICApXG5gYGAifQ== -->
+<pre class="r"><code># Calculate melt composition parameters &amp; TiO2 saturation concentration
 CationFractions &lt;- CationFractions %&gt;%
   mutate(
     M = (Na + K + 2*Ca)/(Si*Al),
     FM = (Na + K + 2*(Ca + Fe + Mg))/(Si*Al),
     C = (10*eCa)/(Si*Al),
-    InvTK = 1/(TC+273.15)
+    InvTK = 1/(TC+273.15),
+    TiO2Sat = (0.79*C - 7993*InvTK + 7.89)
     )</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBTY2F0dGVycGxvdCBtYXRyaWNlc1xubGlicmFyeShjYXIpXG5zY2F0dGVycGxvdE1hdHJpeCh+IFRpICsgQ2EgKyBBbCArIEludlRLICsgTSArIEZNICsgQywgZGF0YSA9IENhdGlvbkZyYWN0aW9ucywgZ3JvdXBzID0gQ2F0aW9uRnJhY3Rpb25zJE1vZGVsLCBzbW9vdGggPSBGQUxTRSlcbiMgQ29ycmVsYXRpb24gbWF0cml4XG5Db3JyVGVzdCA8LSBzZWxlY3QoQ2F0aW9uRnJhY3Rpb25zLCBUaU8yLCBNOkludlRLKVxuY29yKENvcnJUZXN0KVxuIyBHbGFzcyBUaU8yIGNvbmNlbnRyYXRpb24gaXMgbW9zdCBoaWdobHkgY29ycmVsYXRlZCB3aXRoIG1lbHQgY29tcG9zaXRpb24gcGFyYW1ldGVyIEMuXG5cbmBgYCJ9 -->
-<pre class="r"><code># Scatterplot matrices
-library(car)
-scatterplotMatrix(~ Ti + Ca + Al + InvTK + M + FM + C, data = CationFractions, groups = CationFractions$Model, smooth = FALSE)
-# Correlation matrix
-CorrTest &lt;- select(CationFractions, TiO2, M:InvTK)
-cor(CorrTest)
-# Glass TiO2 concentration is most highly correlated with melt composition parameter C.
-</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDYWxjdWxhdGUgVGlPMiBzYXR1cmF0aW9uIGNvbmNlbnRyYXRpb25cbkNhdGlvbkZyYWN0aW9ucyA8LSBDYXRpb25GcmFjdGlvbnMgJT4lXG4gIG11dGF0ZShcbiAgICBUaU8yc2F0IDwtICgwLjc5KkMgLSA3OTkzKkludlRLICsgNy44OSlcbiAgKVxuIyBQbG90IFRpTzJzYXQgb24geC1heGlzIGFuZCBUaU8yIG9uIHktYXhpcy5cbiMgSWRlYWxseSBhbGwgcG9pbnRzIHNob3VsZCBmYWxsIG9uIGEgMToxIGxpbmVcbnFwbG90KENhdGlvbkZyYWN0aW9ucyRUaU8yc2F0LCBDYXRpb25GcmFjdGlvbnMkVGlPMilcbmBgYCJ9 -->
+<pre class="r"><code># Calculate TiO2 saturation concentration
+CationFractions &lt;- CationFractions %&gt;%
+  mutate(
+    TiO2sat &lt;- (0.79*C - 7993*InvTK + 7.89)
+  )
+# Plot TiO2sat on x-axis and TiO2 on y-axis.
+# Ideally all points should fall on a 1:1 line
+qplot(CationFractions$TiO2sat, CationFractions$TiO2)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZml0IDwtIGxtKFRpTzIgfiBDICsgSW52VEssIGRhdGEgPSBDYXRpb25GcmFjdGlvbnMpXG5zdW1tYXJ5KGZpdClcbnBsb3QoZml0KVxuXG5gYGAifQ== -->
-<pre class="r"><code>fit &lt;- lm(TiO2 ~ C + InvTK, data = CationFractions)
-summary(fit)
-plot(fit)
-</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBFeHBlcmltZW50cyAyOSwgMzAgJiAzMSBhcmUgaWRlbnRpZmllZCBhcyBvdXRsaWVycy4gVGhleSB3ZXJlIERhbm55J3MgZWFybGllc3QgZXhwZXJpbWVudHMsIGFuZCB3ZXJlIGFsbCBydW4gYXQgMTMwMEMuXG5cblJlZ01vZGVsIDwtIHNlbGVjdChDYXRpb25GcmFjdGlvbnMsIE1vZGVsLCBFeHB0LCBUaU8yLCBJbnZUSywgQylcblJlZ01vZGVsIDwtIHNsaWNlKFJlZ01vZGVsLCAtKDI5OjMxKSlcbmZpdCA8LSBsbShUaU8yIH4gQyArIEludlRLLCBkYXRhID0gUmVnTW9kZWwpXG5zdW1tYXJ5KGZpdClcbnBsb3QoZml0KVxuXG5gYGAifQ== -->
-<pre class="r"><code># Experiments 29, 30 &amp; 31 are identified as outliers. They were Danny&#39;s earliest experiments, and were all run at 1300C.
-
-RegModel &lt;- select(CationFractions, Model, Expt, TiO2, InvTK, C)
-RegModel &lt;- slice(RegModel, -(29:31))
-fit &lt;- lm(TiO2 ~ C + InvTK, data = RegModel)
-summary(fit)
-plot(fit)
-</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBFeHBlcmltZW50cyBpbiByb3dzIDI4LCAyOSBhcmUgb3V0bGllcnMuXG5SZWdNb2RlbCA8LSBzbGljZShSZWdNb2RlbCwgLSgyODoyOSkpXG5maXQgPC0gbG0oVGlPMiB+IEMgKyBJbnZUSywgZGF0YSA9IFJlZ01vZGVsKVxuc3VtbWFyeShmaXQpXG5wbG90KGZpdClcbiMgSSB0aGluayB0aGlzIGlzIG91ciBiZXN0IG1vZGVsLiBSZW1vdmluZyBtb3JlIGV4cGVyaW1lbnRzIGRvZXNuJ3Qgc2lnbmlmaWNhbnRseSBpbXByb3ZlIGZpdC5cbndyaXRlLmNzdihSZWdNb2RlbCwgXCJFeHB0c0luTW9kZWwuY3N2XCIpXG5gYGAifQ== -->
-<pre class="r"><code># Experiments in rows 28, 29 are outliers.
-RegModel &lt;- slice(RegModel, -(28:29))
-fit &lt;- lm(TiO2 ~ C + InvTK, data = RegModel)
-summary(fit)
-plot(fit)
-# I think this is our best model. Removing more experiments doesn&#39;t significantly improve fit.
-write.csv(RegModel, &quot;ExptsInModel.csv&quot;)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBUcnkgZmlsdGVyaW5nIG91dCBleHBlcmltZW50cyB3aXRoIE1vZGVsID0gXCJOXCJcblJlZ01vZGVsIDwtIHNlbGVjdChDYXRpb25GcmFjdGlvbnMsIE1vZGVsLCBFeHB0LCBUaU8yLCBJbnZUSywgQylcblJlZ01vZGVsIDwtIGZpbHRlcihSZWdNb2RlbCwgTW9kZWwgPT0gXCJZXCIpXG5maXQgPC0gbG0oVGlPMiB+IEMgKyBJbnZUSywgZGF0YSA9IFJlZ01vZGVsKVxuc3VtbWFyeShmaXQpXG5wbG90KGZpdClcbiMgNiBmZXdlciBleHBlcmltZW50cyBpbmNyZWFzZXMgcl4yIHRvIDAuOThcbmBgYCJ9 -->
-<pre class="r"><code># Try filtering out experiments with Model = &quot;N&quot;
-RegModel &lt;- select(CationFractions, Model, Expt, TiO2, InvTK, C)
-RegModel &lt;- filter(RegModel, Model == &quot;Y&quot;)
-fit &lt;- lm(TiO2 ~ C + InvTK, data = RegModel)
-summary(fit)
-plot(fit)
-# 6 fewer experiments increases r^2 to 0.98</code></pre>
-<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3I6IGdlb21fcG9pbnQgcmVxdWlyZXMgdGhlIGZvbGxvd2luZyBtaXNzaW5nIGFlc3RoZXRpY3M6IHhcbiJ9 -->
+<pre><code>Error: geom_point requires the following missing aesthetics: x</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjMwMS42MDY5LCJ3aWR0aCI6NDg4LCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbWzEsIlVua25vd24gb3IgdW5pbml0aWFsaXNlZCBjb2x1bW46IGBUaU8yc2F0YC4iXSxbMSwiVW5rbm93biBvciB1bmluaXRpYWxpc2VkIGNvbHVtbjogYFRpTzJzYXRgLiJdXX0= -->
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAegAAAEtCAMAAAD0qwM5AAAAA1BMVEX///+nxBvIAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAApUlEQVR4nO3BMQEAAADCoPVPbQwfoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgbD8TAAFVreFvAAAAAElFTkSuQmCC" /></p>
+<!-- rnb-plot-end -->
 <!-- rnb-chunk-end -->
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlRpdGFuaXRlIHNvbHViaWxpdHkgZXhwZXJpbWVudHM6IEFuYWx5c2lzIG9mIEVEUyBkYXRhIg0KYXV0aG9yOiBKb2huIEMuIEF5ZXJzDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpgYGB7cn0NCmxpYnJhcnkodGlkeXZlcnNlLCB3YXJuLmNvbmZsaWN0cyA9IEZBTFNFKQ0Kc2V0d2QoIkM6L1VzZXJzL2F5ZXJzai9PbmVEcml2ZSAtIFZhbmRlcmJpbHQvUGFwZXJzL1NwaGVuZVNvbHViaWxpdHkvRGF0YUFuYWx5c2lzL1RpdGFuaXRlRXhwdHMiKQ0KIyBJbXBvcnQgbm9ybWFsaXplZCBFRFMgZ2xhc3MgYW5hbHlzZXMNClRpdGFuaXRlRXhwdHMgPC0gcmVhZF9jc3YoIlRpdGFuaXRlRXhwdHMuY3N2IikNCmBgYA0KYGBge3J9DQpUaXRhbml0ZUNhdGlvbnMgPC0gVGl0YW5pdGVFeHB0cyAlPiUNCiAgbXV0YXRlKA0KICAgIFNpID0gU2lPMi82MC4wODQ4LA0KICAgIEFsID0gMipBbDJPMy8xMDEuOTYxLA0KICAgIE5hID0gMipOYTJPLzYxLjk3OSwNCiAgICBLID0gMipLMk8vOTQuMTk0LA0KICAgIENhID0gQ2FPLzU2LjA3OTQsDQogICAgRmUgPSBGZU8vNzEuODQ2NCwNCiAgICBNZyA9IE1nTy80MC4zMDQ0LA0KICAgIFRpID0gVGlPMi83OS44OTg4LA0KICAgIE1uID0gTW5PLzcwLjkzNzQsDQogICAgUCA9IDIqUDJPNS8xNDEuOTQ1LA0KICAgIGVDYSA9IChDYU8vNTYuMDc5NCAtIEFsMk8zLzEwMS45NjEgKyBLMk8vOTQuMTk0ICsgTmEyTy82MS45NzkpLA0KICAgIENhdGlvblN1bSA9IChTaSArIEFsICsgTmEgKyBLICsgQ2EgKyBGZSArIE1nICsgVGkgKyBNbiArIFApDQogICAgICAgICAgICAgKQ0KYGBgDQoNCmBgYHtyfQ0KIyBDYWxjdWxhdGUgY2F0aW9uIGZyYWN0aW9ucw0KQ2F0aW9uRnJhY3Rpb25zIDwtIHNlbGVjdChUaXRhbml0ZUNhdGlvbnMsIE1vZGVsLCBFeHB0LCBUQywgVGlPMiwgU2k6ZUNhLCBDYXRpb25TdW0pDQpmIDwtIG1hdGNoKCJTaSIsIG5hbWVzKENhdGlvbkZyYWN0aW9ucykpDQpsIDwtIG1hdGNoKCJlQ2EiLCBuYW1lcyhDYXRpb25GcmFjdGlvbnMpKQ0KZm9yIChpIGluIGY6bCkgew0KICBDYXRpb25GcmFjdGlvbnNbKGkpXSA9IENhdGlvbkZyYWN0aW9uc1soaSldL0NhdGlvbkZyYWN0aW9ucyRDYXRpb25TdW0NCn0NCg0KYGBgDQoNCg0KYGBge3J9DQojIENhbGN1bGF0ZSBtZWx0IGNvbXBvc2l0aW9uIHBhcmFtZXRlcnMNCkNhdGlvbkZyYWN0aW9ucyA8LSBDYXRpb25GcmFjdGlvbnMgJT4lDQogIG11dGF0ZSgNCiAgICBNID0gKE5hICsgSyArIDIqQ2EpLyhTaSpBbCksDQogICAgRk0gPSAoTmEgKyBLICsgMiooQ2EgKyBGZSArIE1nKSkvKFNpKkFsKSwNCiAgICBDID0gKDEwKmVDYSkvKFNpKkFsKSwNCiAgICBJbnZUSyA9IDEvKFRDKzI3My4xNSkNCiAgICApDQpgYGANCg0KDQpgYGB7cn0NCiMgU2NhdHRlcnBsb3QgbWF0cmljZXMNCmxpYnJhcnkoY2FyKQ0Kc2NhdHRlcnBsb3RNYXRyaXgofiBUaSArIENhICsgQWwgKyBJbnZUSyArIE0gKyBGTSArIEMsIGRhdGEgPSBDYXRpb25GcmFjdGlvbnMsIGdyb3VwcyA9IENhdGlvbkZyYWN0aW9ucyRNb2RlbCwgc21vb3RoID0gRkFMU0UpDQojIENvcnJlbGF0aW9uIG1hdHJpeA0KQ29yclRlc3QgPC0gc2VsZWN0KENhdGlvbkZyYWN0aW9ucywgVGlPMiwgTTpJbnZUSykNCmNvcihDb3JyVGVzdCkNCiMgR2xhc3MgVGlPMiBjb25jZW50cmF0aW9uIGlzIG1vc3QgaGlnaGx5IGNvcnJlbGF0ZWQgd2l0aCBtZWx0IGNvbXBvc2l0aW9uIHBhcmFtZXRlciBDLg0KDQpgYGANCg0KYGBge3J9DQpmaXQgPC0gbG0oVGlPMiB+IEMgKyBJbnZUSywgZGF0YSA9IENhdGlvbkZyYWN0aW9ucykNCnN1bW1hcnkoZml0KQ0KcGxvdChmaXQpDQoNCmBgYA0KDQpgYGB7cn0NCiMgRXhwZXJpbWVudHMgMjksIDMwICYgMzEgYXJlIGlkZW50aWZpZWQgYXMgb3V0bGllcnMuIFRoZXkgd2VyZSBEYW5ueSdzIGVhcmxpZXN0IGV4cGVyaW1lbnRzLCBhbmQgd2VyZSBhbGwgcnVuIGF0IDEzMDBDLg0KDQpSZWdNb2RlbCA8LSBzZWxlY3QoQ2F0aW9uRnJhY3Rpb25zLCBNb2RlbCwgRXhwdCwgVGlPMiwgSW52VEssIEMpDQpSZWdNb2RlbCA8LSBzbGljZShSZWdNb2RlbCwgLSgyOTozMSkpDQpmaXQgPC0gbG0oVGlPMiB+IEMgKyBJbnZUSywgZGF0YSA9IFJlZ01vZGVsKQ0Kc3VtbWFyeShmaXQpDQpwbG90KGZpdCkNCg0KYGBgDQpgYGB7cn0NCiMgRXhwZXJpbWVudHMgaW4gcm93cyAyOCwgMjkgYXJlIG91dGxpZXJzLg0KUmVnTW9kZWwgPC0gc2xpY2UoUmVnTW9kZWwsIC0oMjg6MjkpKQ0KZml0IDwtIGxtKFRpTzIgfiBDICsgSW52VEssIGRhdGEgPSBSZWdNb2RlbCkNCnN1bW1hcnkoZml0KQ0KcGxvdChmaXQpDQojIEkgdGhpbmsgdGhpcyBpcyBvdXIgYmVzdCBtb2RlbC4gUmVtb3ZpbmcgbW9yZSBleHBlcmltZW50cyBkb2Vzbid0IHNpZ25pZmljYW50bHkgaW1wcm92ZSBmaXQuDQp3cml0ZS5jc3YoUmVnTW9kZWwsICJFeHB0c0luTW9kZWwuY3N2IikNCmBgYA0KDQoNCmBgYHtyfQ0KIyBUcnkgZmlsdGVyaW5nIG91dCBleHBlcmltZW50cyB3aXRoIE1vZGVsID0gIk4iDQpSZWdNb2RlbCA8LSBzZWxlY3QoQ2F0aW9uRnJhY3Rpb25zLCBNb2RlbCwgRXhwdCwgVGlPMiwgSW52VEssIEMpDQpSZWdNb2RlbCA8LSBmaWx0ZXIoUmVnTW9kZWwsIE1vZGVsID09ICJZIikNCmZpdCA8LSBsbShUaU8yIH4gQyArIEludlRLLCBkYXRhID0gUmVnTW9kZWwpDQpzdW1tYXJ5KGZpdCkNCnBsb3QoZml0KQ0KIyA2IGZld2VyIGV4cGVyaW1lbnRzIGluY3JlYXNlcyByXjIgdG8gMC45OA0KYGBgDQo=</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIlRpdGFuaXRlIHNvbHViaWxpdHkgZXhwZXJpbWVudHM6IEFuYWx5c2lzIG9mIEVEUyBkYXRhIg0KYXV0aG9yOiBKb2huIEMuIEF5ZXJzDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpgYGB7cn0NCmxpYnJhcnkodGlkeXZlcnNlLCB3YXJuLmNvbmZsaWN0cyA9IEZBTFNFKQ0Kc2V0d2QoIkM6L1VzZXJzL2F5ZXJzai9PbmVEcml2ZSAtIFZhbmRlcmJpbHQvUGFwZXJzL1NwaGVuZVNvbHViaWxpdHkvRGF0YUFuYWx5c2lzL1RpdGFuaXRlRXhwdHMiKQ0KIyBJbXBvcnQgbm9ybWFsaXplZCBFRFMgZ2xhc3MgYW5hbHlzZXMNClRpdGFuaXRlRXhwdHMgPC0gcmVhZF9jc3YoIkxFUFJfVGl0YW5pdGUuY3N2IikNCmBgYA0KDQoNCmBgYHtyfQ0KVGl0YW5pdGVDYXRpb25zIDwtIFRpdGFuaXRlRXhwdHMgJT4lDQogIG11dGF0ZSgNCiAgICBTaSA9IFNpTzIvNjAuMDg0OCwNCiAgICBBbCA9IDIqQWwyTzMvMTAxLjk2MSwNCiAgICBOYSA9IDIqTmEyTy82MS45NzksDQogICAgSyA9IDIqSzJPLzk0LjE5NCwNCiAgICBDYSA9IENhTy81Ni4wNzk0LA0KICAgIEZlID0gRmVPLzcxLjg0NjQsDQogICAgTWcgPSBNZ08vNDAuMzA0NCwNCiAgICBUaSA9IFRpTzIvNzkuODk4OCwNCiAgICBlQ2EgPSAoQ2FPLzU2LjA3OTQgLSBBbDJPMy8xMDEuOTYxICsgSzJPLzk0LjE5NCArIE5hMk8vNjEuOTc5KSwNCiAgICBDYXRpb25TdW0gPSAoU2kgKyBBbCArIE5hICsgSyArIENhICsgRmUgKyBNZyArIFRpKQ0KICAgICApDQpgYGANCg0KYGBge3J9DQojIENhbGN1bGF0ZSBjYXRpb24gZnJhY3Rpb25zDQpDYXRpb25GcmFjdGlvbnMgPC0gc2VsZWN0KFRpdGFuaXRlQ2F0aW9ucywgRXhwdCwgVEMsIFRpTzIsIFNpOmVDYSwgQ2F0aW9uU3VtKQ0KZiA8LSBtYXRjaCgiU2kiLCBuYW1lcyhDYXRpb25GcmFjdGlvbnMpKQ0KbCA8LSBtYXRjaCgiZUNhIiwgbmFtZXMoQ2F0aW9uRnJhY3Rpb25zKSkNCmZvciAoaSBpbiBmOmwpIHsNCiAgQ2F0aW9uRnJhY3Rpb25zWyhpKV0gPSBDYXRpb25GcmFjdGlvbnNbKGkpXS9DYXRpb25GcmFjdGlvbnMkQ2F0aW9uU3VtDQp9DQoNCmBgYA0KDQoNCmBgYHtyfQ0KIyBDYWxjdWxhdGUgbWVsdCBjb21wb3NpdGlvbiBwYXJhbWV0ZXJzICYgVGlPMiBzYXR1cmF0aW9uIGNvbmNlbnRyYXRpb24NCkNhdGlvbkZyYWN0aW9ucyA8LSBDYXRpb25GcmFjdGlvbnMgJT4lDQogIG11dGF0ZSgNCiAgICBNID0gKE5hICsgSyArIDIqQ2EpLyhTaSpBbCksDQogICAgRk0gPSAoTmEgKyBLICsgMiooQ2EgKyBGZSArIE1nKSkvKFNpKkFsKSwNCiAgICBDID0gKDEwKmVDYSkvKFNpKkFsKSwNCiAgICBJbnZUSyA9IDEvKFRDKzI3My4xNSksDQogICAgVGlPMlNhdCA9ICgwLjc5KkMgLSA3OTkzKkludlRLICsgNy44OSkNCiAgICApDQpgYGANCg0KDQpgYGB7cn0NCiMgQ2FsY3VsYXRlIFRpTzIgc2F0dXJhdGlvbiBjb25jZW50cmF0aW9uDQpDYXRpb25GcmFjdGlvbnMgPC0gQ2F0aW9uRnJhY3Rpb25zICU+JQ0KICBtdXRhdGUoDQogICAgVGlPMnNhdCA8LSAoMC43OSpDIC0gNzk5MypJbnZUSyArIDcuODkpDQogICkNCiMgUGxvdCBUaU8yc2F0IG9uIHgtYXhpcyBhbmQgVGlPMiBvbiB5LWF4aXMuDQojIElkZWFsbHkgYWxsIHBvaW50cyBzaG91bGQgZmFsbCBvbiBhIDE6MSBsaW5lDQpxcGxvdChDYXRpb25GcmFjdGlvbnMkVGlPMnNhdCwgQ2F0aW9uRnJhY3Rpb25zJFRpTzIpDQpgYGA=</div>
 
 
 
@@ -1917,7 +1899,7 @@ $(document).ready(function () {
 <!-- code folding -->
 <script>
 $(document).ready(function () {
-  window.initializeSourceEmbed("TitaniteExpts.Rmd");
+  window.initializeSourceEmbed("LEPR_Analysis.Rmd");
   window.initializeCodeFolding("show" === "show");
 });
 </script>
