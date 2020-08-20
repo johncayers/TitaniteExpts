@@ -1,7 +1,9 @@
 ---
-title: "Titanite solubility experiments: Analysis of EDS data"
-author: John C. Ayers
-output: html_notebook
+title: 'Titanite solubility experiments: Analysis of EDS data'
+author: "John C. Ayers"
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r}
@@ -67,8 +69,8 @@ ggplot(CationFractions, aes(x=TiO2Sat, y=TiO2, color=C)) +
 ```{r}
 # Model works for low values of C. Need to fit a model to all of the data. Add LEPR data to our and fit a new model. 
 AllExpts <- read_csv("AllExpts.csv")
-
 ```
+
 ```{r}
 TitaniteCations <- AllExpts %>%
   mutate(
@@ -122,62 +124,57 @@ cor(CorrTest)
 
 
 ```{r}
-fit <- lm(TiO2 ~ C + InvTK, data = CationFractions)
+fit <- lm(TiO2 ~ M + InvTK, data = CationFractions)
 summary(fit)
 plot(fit)
 ```
 
 
 ```{r}
-RegModel <- select(CationFractions, Source, Expt, TiO2, InvTK, C)
-RegModel <- slice(RegModel, -(23:25))
-fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
+RegModel <- CationFractions
+RegModel <- filter(RegModel, Expt != c("SpDis_1", "SpDis_2", "SpDis_3", "ASI200"))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
 ```
 ```{r}
-RegModel <- slice(RegModel, -(23))
+RegModel <- slice(RegModel, -(56))
+RegModel <- slice(RegModel, -(29))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+```{r}
+RegModel <- slice(RegModel, -(58))
 RegModel <- slice(RegModel, -(52))
-fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
-summary(fit)
-plot(fit)
-```
-
-```{r}
-RegModel <- slice(RegModel, -(51))
-fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
+RegModel <- slice(RegModel, -(40))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
 ```
 
 
 ```{r}
-RegModel <- slice(RegModel, -(49))
-fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
-summary(fit)
-plot(fit)
-```
-
-```{r}
-RegModel <- slice(RegModel, -(49))
-fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
+RegModel <- slice(RegModel, -(50))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
 ```
 
 ```{r}
 # Calculate new model TiO2 concentrations and errors
-CationFractions <- CationFractions %>%
+RegModel <- RegModel %>%
   mutate(
-   ModelTiO2 = (0.1994*C - 8117*InvTK + 8.105),
-   ModelTiO2SD = ModelTiO2*sqrt((0.00892/0.1994)^2 + (1367/8117)^2),
+   ModelTiO2 = (1.002*M - 7554*InvTK + 6.1),
+   ModelTiO2SD = ModelTiO2*sqrt((0.0391/1.002)^2 + (1182/7554)^2),
    lower = ModelTiO2 - ModelTiO2SD,
    upper = ModelTiO2 + ModelTiO2SD
   )
 ```
 
 ```{r}
-ggplot(CationFractions, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper, color=Source)) +
+ggplot(RegModel, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper, color=Source)) +
   geom_pointrange() +
   geom_abline(slope=1, intercept=0)
 ```
@@ -185,6 +182,6 @@ ggplot(CationFractions, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper, color=S
 
 ```{r}
 # Create model output table
-TiO2AllExptsModelTable <- select(CationFractions, Source, Expt, eCa, C, InvTK, TiO2, ModelTiO2, ModelTiO2SD)
+TiO2AllExptsModelTable <- select(RegModel, Source, Expt, eCa, C, InvTK, TiO2, ModelTiO2, ModelTiO2SD)
 write.csv(TiO2AllExptsModelTable, file = "TiO2AllExptsModelTable.csv")
 ```
