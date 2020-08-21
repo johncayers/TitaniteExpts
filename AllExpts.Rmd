@@ -1,0 +1,160 @@
+---
+title: "Titanite solubility: Flanagan + LEPR experiments"
+output: html_notebook
+---
+```{r}
+# Add LEPR data to our data and fit a new model.
+library(tidyverse, warn.conflicts = FALSE)
+setwd("C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/DataAnalysis/TitaniteExpts")
+AllExpts <- read_csv("AllExpts.csv")
+```
+
+```{r}
+TitaniteCations <- AllExpts %>%
+  mutate(
+    Si = SiO2/60.0848,
+    Al = 2*Al2O3/101.961,
+    Na = 2*Na2O/61.979,
+    K = 2*K2O/94.194,
+    Ca = CaO/56.0794,
+    Fe = FeO/71.8464,
+    Mg = MgO/40.3044,
+    Ti = TiO2/79.8988,
+    eCa = (CaO/56.0794 - Al2O3/101.961 + K2O/94.194 + Na2O/61.979),
+    CationSum = (Si + Al + Na + K + Ca + Fe + Mg + Ti)
+     )
+```
+
+```{r}
+# Calculate cation fractions
+CationFractions <- TitaniteCations
+f <- match("Si", names(CationFractions))
+l <- match("eCa", names(CationFractions))
+for (i in f:l) {
+  CationFractions[(i)] = CationFractions[(i)]/CationFractions$CationSum
+}
+
+```
+
+```{r}
+# Calculate melt composition parameters & TiO2 saturation concentration
+CationFractions <- CationFractions %>%
+  mutate(
+    M = (Na + K + 2*Ca)/(Si*Al),
+    FM = (Na + K + 2*(Ca + Fe + Mg))/(Si*Al),
+    C = (10*eCa)/(Si*Al),
+    InvTK = 1/(TC+273.15)
+    )
+```
+
+```{r}
+# Scatterplot matrices
+library(car)
+scatterplotMatrix(~ Ti + Ca + Al + InvTK + M + FM + C, data = CationFractions, groups = CationFractions$Source, smooth = FALSE)
+dev.copy(png,"ScatterPlotMatrixAllExpts.png")
+dev.off()   
+# Correlation matrix
+CorrTest <- select(CationFractions, TiO2, M:InvTK)
+cor(CorrTest)
+# LEPR compositions show bimodal distribution. 
+# LEPR data show different dependence on C than our data. 
+```
+
+
+```{r}
+fit <- lm(TiO2 ~ M + InvTK, data = CationFractions)
+summary(fit)
+plot(fit)
+```
+
+
+```{r}
+RegModel <- CationFractions
+RegModel <- filter(RegModel, Expt != c("SpDis_1", "SpDis_2", "SpDis_3", "ASI200"))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+```{r}
+RegModel <- slice(RegModel, -(56))
+RegModel <- slice(RegModel, -(29))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+```{r}
+RegModel <- slice(RegModel, -(58))
+RegModel <- slice(RegModel, -(52))
+RegModel <- slice(RegModel, -(40))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+
+```{r}
+RegModel <- slice(RegModel, -(50))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+```{r}
+# Calculate model TiO2 concentrations and errors
+RegModel <- RegModel %>%
+  mutate(
+   ModelTiO2 = (1.002*M - 7554*InvTK + 6.1),
+   ModelTiO2SD = ModelTiO2*sqrt((0.0391/1.002)^2 + (1182/7554)^2),
+   lower = ModelTiO2 - ModelTiO2SD,
+   upper = ModelTiO2 + ModelTiO2SD
+  )
+```
+
+```{r}
+ggplot(RegModel, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper, color=Source)) +
+  geom_pointrange() +
+  geom_abline(slope=1, intercept=0)
+```
+
+```{r}
+# Delete 4 LEPR experiments with TiO2 6.25-7.5:
+RegModel <- slice(RegModel, -(50:51))
+RegModel <- slice(RegModel, -(40:41))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+```{r}
+# Calculate model TiO2 concentrations and errors
+RegModel <- RegModel %>%
+  mutate(
+   ModelTiO2 = (1.038*M - 7164*InvTK + 5.684),
+   ModelTiO2SD = ModelTiO2*sqrt((0.0425/1.038)^2 + (1148/7164)^2),
+   lower = ModelTiO2 - ModelTiO2SD,
+   upper = ModelTiO2 + ModelTiO2SD
+  )
+```
+
+
+```{r}
+label <- RegModel %>%
+  summarise(
+    ModelTiO2 = 6.25,
+    TiO2 = 5.0,
+    label = "y = 1.038*M - 7164*InvTK + 5.684\n = 65, r^2 = 0.95"
+  )
+# Plot only works when I don't add labels, even though the code is identical to that in Chpt. 28 of Wickham and Grolemund "R for Data Science" 
+ggplot(data=RegModel, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper, color=Source)) +
+  geom_pointrange() +
+  geom_abline(slope=1, intercept=0)  
+  # geom_text(aes(label = label), data = label, vjust = "bottom", hjust = "right")
+```
+
+
+```{r}
+# Create model output table
+TiO2AllExptsModelTable <- select(RegModel, Source, Expt, eCa, C, InvTK, TiO2, ModelTiO2, ModelTiO2SD)
+write.csv(TiO2AllExptsModelTable, file = "TiO2AllExptsModelTable.csv")
+```
