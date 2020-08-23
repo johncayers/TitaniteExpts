@@ -75,6 +75,7 @@ fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
 ```
+
 ```{r}
 RegModel <- slice(RegModel, -(56))
 RegModel <- slice(RegModel, -(29))
@@ -139,12 +140,12 @@ RegModel <- RegModel %>%
 
 
 ```{r}
-label <- RegModel %>%
-  summarise(
-    ModelTiO2 = 6.25,
-    TiO2 = 5.0,
-    label = "y = 1.038*M - 7164*InvTK + 5.684\n = 65, r^2 = 0.95"
-  )
+# label <- RegModel %>%
+#   summarise(
+#     ModelTiO2 = 6.25,
+#     TiO2 = 5.0,
+#     label = "y = 1.038*M - 7164*InvTK + 5.684\n = 65, r^2 = 0.95"
+#   )
 # Plot only works when I don't add labels, even though the code is identical to that in Chpt. 28 of Wickham and Grolemund "R for Data Science" 
 ggplot(data=RegModel, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper, color=Source)) +
   geom_pointrange() +

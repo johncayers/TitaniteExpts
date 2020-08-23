@@ -67,3 +67,49 @@ ggplot(CationFractions, aes(x=TiO2Sat, y=TiO2, color=C)) +
 ```
 
 
+```{r}
+RegModel <- CationFractions
+RegModel <- filter(RegModel, Expt != "ASI200")
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+```{r}
+RegModel <- slice(RegModel, -(25:26))
+RegModel <- slice(RegModel, -(13))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+```{r}
+RegModel <- slice(RegModel, -(28:29))
+RegModel <- slice(RegModel, -(13))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+```{r}
+# Calculate model TiO2 concentrations and errors
+RegModel <- RegModel %>%
+  mutate(
+   ModelTiO2 = (1.133*M - 5583*InvTK + 3.839),
+   ModelTiO2SD = ModelTiO2*sqrt((0.0304/1.133)^2 + (1062/5583)^2),
+   lower = ModelTiO2 - ModelTiO2SD,
+   upper = ModelTiO2 + ModelTiO2SD
+  )
+```
+
+```{r}
+ggplot(data=RegModel, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper)) +
+  geom_pointrange() +
+  geom_abline(slope=1, intercept=0)  
+```
+
+```{r}
+ggplot(data=RegModel, aes(x=log(TiO2), y=log(ModelTiO2), ymin=log(lower), ymax=log(upper))) +
+  geom_pointrange() +
+  geom_abline(slope=1, intercept=0)  
+```
