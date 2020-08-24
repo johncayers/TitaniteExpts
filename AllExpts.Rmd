@@ -1,6 +1,8 @@
 ---
-title: "Titanite solubility: Flanagan + LEPR experiments"
-output: html_notebook
+title: 'Titanite solubility: Flanagan + LEPR experiments'
+output:
+  html_document:
+    df_print: paged
 ---
 ```{r}
 # Add LEPR data to our data and fit a new model.
@@ -60,14 +62,6 @@ cor(CorrTest)
 # LEPR data show different dependence on C than our data. 
 ```
 
-
-```{r}
-fit <- lm(TiO2 ~ M + InvTK, data = CationFractions)
-summary(fit)
-plot(fit)
-```
-
-
 ```{r}
 RegModel <- CationFractions
 RegModel <- filter(RegModel, Expt != c("SpDis_1", "SpDis_2", "SpDis_3", "ASI200"))
@@ -85,8 +79,25 @@ plot(fit)
 ```
 
 ```{r}
+RegModel <- slice(RegModel, -(60))
+RegModel <- slice(RegModel, -(53))
+RegModel <- slice(RegModel, -(41))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+
+```{r}
 RegModel <- slice(RegModel, -(58))
 RegModel <- slice(RegModel, -(52))
+RegModel <- slice(RegModel, -(22))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+```{r}
 RegModel <- slice(RegModel, -(40))
 fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
@@ -95,18 +106,20 @@ plot(fit)
 
 
 ```{r}
-RegModel <- slice(RegModel, -(50))
-fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+# See how fit with C parameter compares
+fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
+# Model with C has the same fit as M: multiple r^2 = 0.96.
 ```
+
 
 ```{r}
 # Calculate model TiO2 concentrations and errors
 RegModel <- RegModel %>%
   mutate(
-   ModelTiO2 = (1.002*M - 7554*InvTK + 6.1),
-   ModelTiO2SD = ModelTiO2*sqrt((0.0391/1.002)^2 + (1182/7554)^2),
+   ModelTiO2 = (1.012*M - 7429*InvTK + 5.966),
+   ModelTiO2SD = ModelTiO2*sqrt((0.03415/1.012)^2 + (1005/7429)^2),
    lower = ModelTiO2 - ModelTiO2SD,
    upper = ModelTiO2 + ModelTiO2SD
   )
@@ -119,25 +132,23 @@ ggplot(RegModel, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper, color=Source))
 ```
 
 ```{r}
-# Delete 4 LEPR experiments with TiO2 6.25-7.5:
-RegModel <- slice(RegModel, -(50:51))
-RegModel <- slice(RegModel, -(40:41))
-fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
-summary(fit)
-plot(fit)
+ggplot(RegModel, aes(x=M, y=TiO2, color=Source)) +
+  geom_point()
 ```
 
 ```{r}
-# Calculate model TiO2 concentrations and errors
-RegModel <- RegModel %>%
-  mutate(
-   ModelTiO2 = (1.038*M - 7164*InvTK + 5.684),
-   ModelTiO2SD = ModelTiO2*sqrt((0.0425/1.038)^2 + (1148/7164)^2),
-   lower = ModelTiO2 - ModelTiO2SD,
-   upper = ModelTiO2 + ModelTiO2SD
-  )
+ggplot(RegModel, aes(x=InvTK, y=TiO2, color=Source)) +
+  geom_point()
 ```
 
+```{r}
+# Delete 4 LEPR experiments with TiO2 6.25-7.5:
+# RegModel <- slice(RegModel, -(50:51))
+# RegModel <- slice(RegModel, -(40:41))
+# fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+# summary(fit)
+# plot(fit)
+```
 
 ```{r}
 # label <- RegModel %>%
@@ -147,10 +158,20 @@ RegModel <- RegModel %>%
 #     label = "y = 1.038*M - 7164*InvTK + 5.684\n = 65, r^2 = 0.95"
 #   )
 # Plot only works when I don't add labels, even though the code is identical to that in Chpt. 28 of Wickham and Grolemund "R for Data Science" 
-ggplot(data=RegModel, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper, color=Source)) +
-  geom_pointrange() +
-  geom_abline(slope=1, intercept=0)  
+# ggplot(data=RegModel, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper, color=Source)) +
+#   geom_pointrange() +
+#   geom_abline(slope=1, intercept=0)  
   # geom_text(aes(label = label), data = label, vjust = "bottom", hjust = "right")
+```
+
+```{r}
+# Use previously determined list of experiments to include in model
+# Expts <- c("SpG_17", "SpG_29", "SpG_33", "SpG_18", "SpG_20", "SpG_34", "SpG_32", "SpG_11", "SpG_23", "SpG_7", "SpG_12", "SpG_8", "SpG_10", "SpDis_18", "SpDis_21", "SpDis_17", "SpDis_7", "SpDis_10", "SpDis_11", "SpDis_12", "SpDis_13", "SpDis_15", "SpG_30", "SpDis_4", "SpDis_16", "SpG_15", "SpG_16", "SpG_19", "ND-002-18", "ND-002-20", "HL220-without", "HL220-25", "HL220-50", "HL220-100", "HL220-250", "HL220-1500", "HL220-2500", "HL220-5000", "HL220-15000", "HL220-60000", "HL220-75000", "HL240-100", "HL240-250", "HL240-500", "HL240-2000", "HL240-5000", "HL240-20000", "HL240-45000", "HL22REE-200", "SH2K", "SH2Na", "ASI220", "ASI240", "ASI250", "ASI280", "DAC", "RHY", "1044BA", "1044A", "1044T", "1045BA", "1045A", "1045T", "1046BA", "1046A", "1046T", "1056BA", "1056A", "1056T")
+# RegModel <- filter(CationFractions, Expt %in% Expts)
+# fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+# summary(fit)
+# plot(fit)
+
 ```
 
 

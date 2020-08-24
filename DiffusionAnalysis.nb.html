@@ -1751,27 +1751,21 @@ summary {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuRGlmZnVzaW9uUHJvZmlsZXMgPC0gcmVhZF9jc3YoXCJEaWZmdXNpb25Qcm9maWxlcy5jc3ZcIilcblxuYGBgIn0= -->
-<pre class="r"><code>DiffusionProfiles &lt;- read_csv(&quot;DiffusionProfiles.csv&quot;)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShwcmFjbWEpXG5cbmBgYCJ9 -->
+<pre class="r"><code>library(pracma)
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiUGFyc2VkIHdpdGggY29sdW1uIHNwZWNpZmljYXRpb246XG5jb2xzKFxuICBFeHB0ID0gY29sX2NoYXJhY3RlcigpLFxuICB4ID0gY29sX2RvdWJsZSgpLFxuICBTaU8yID0gY29sX2RvdWJsZSgpLFxuICBBbDJPMyA9IGNvbF9kb3VibGUoKSxcbiAgTmEyTyA9IGNvbF9kb3VibGUoKSxcbiAgSzJPID0gY29sX2RvdWJsZSgpLFxuICBDYU8gPSBjb2xfZG91YmxlKCksXG4gIEZlTyA9IGNvbF9kb3VibGUoKSxcbiAgTWdPID0gY29sX2RvdWJsZSgpLFxuICBUaU8yID0gY29sX2RvdWJsZSgpLFxuICBNbk8gPSBjb2xfZG91YmxlKCksXG4gIFAyTzUgPSBjb2xfZG91YmxlKClcbilcbiJ9 -->
-<pre><code>Parsed with column specification:
-cols(
-  Expt = col_character(),
-  x = col_double(),
-  SiO2 = col_double(),
-  Al2O3 = col_double(),
-  Na2O = col_double(),
-  K2O = col_double(),
-  CaO = col_double(),
-  FeO = col_double(),
-  MgO = col_double(),
-  TiO2 = col_double(),
-  MnO = col_double(),
-  P2O5 = col_double()
-)</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiXG5BdHRhY2hpbmcgcGFja2FnZTog46S847ixcHJhY21h46S847iyXG5cblRoZSBmb2xsb3dpbmcgb2JqZWN0IGlzIG1hc2tlZCBmcm9tIOOkvOO4sXBhY2thZ2U6cHVycnLjpLzjuLI6XG5cbiAgICBjcm9zc1xuIn0= -->
+<pre><code>
+Attaching package: 㤼㸱pracma㤼㸲
+
+The following object is masked from 㤼㸱package:purrr㤼㸲:
+
+    cross</code></pre>
 <!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQzBpbml0IDwtIGMoNzYuMzMsMTIuODMsMy4zMyw0LjgwLDEuMTQsMC4wMiwwLjA3LDEuNDYsMC4wMSwwLjAxKVxuYGBgIn0= -->
+<pre class="r"><code>C0init &lt;- c(76.33,12.83,3.33,4.80,1.14,0.02,0.07,1.46,0.01,0.01)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuT3hpZGVzIDwtIGMoXCJTaU8yXCIsIFwiQWwyTzNcIiwgXCJOYTJPXCIsIFwiSzJPXCIsIFwiQ2FPXCIsIFwiRmVPXCIsIFwiTWdPXCIsIFwiVGlPMlwiLCBcIk1uT1wiLCBcIlAyTzVcIilcbkRpZmZ1c2lvblByb2ZpbGVzIDwtIERpZmZ1c2lvblByb2ZpbGVzICU+JVxuZ2F0aGVyKGFsbF9vZihPeGlkZXMpLCBrZXkgPSBcIk94aWRlXCIsIHZhbHVlID0gXCJDb25jZW50cmF0aW9uXCIpIFxuYGBgIn0= -->
@@ -1783,10 +1777,9 @@ gather(all_of(Oxides), key = &quot;Oxide&quot;, value = &quot;Concentration&quot
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBcbmxpYnJhcnkocHJhY21hKVxuQzBpbml0IDwtIGMoNzYuMzMsMTIuODMsMy4zMyw0LjgwLDEuMTQsMC4wMiwwLjA3LDEuNDYsMC4wMSwwLjAxKVxuRXggPC0gdW5pcXVlKERpZmZ1c2lvblByb2ZpbGVzJEV4cHQpXG4jIEludmVyZkRhdGEgPC0gc2VsZWN0KERpZmZ1c2lvblByb2ZpbGVzLCB4LCBFeHB0KVxuIyBUZW1wIDwtIHZlY3Rvcihtb2RlID0gXCJkb3VibGVcIiwgbGVuZ3RoID0gNTUzKVxuZm9yIChpIGluIHNlcV9hbG9uZyhFeCkpIHtcbiAgZm9yIChqIGluIHNlcV9hbG9uZyhPeGlkZXMpKSB7XG4gICAgRGlmZnVzaW9uUHJvZmlsZXMkaW52ZXJmIDwtIGVyZmludigxLShEaWZmdXNpb25Qcm9maWxlcyRDb25jZW50cmF0aW9uL0MwaW5pdFtqXSkpXG4gICAgcCA8LSBnZ3Bsb3QoRGlmZnVzaW9uUHJvZmlsZXMsIGFlcyh4LCBDb25jZW50cmF0aW9uKSkgK1xuICAgICAgZ2VvbV9wb2ludCgpXG4gICAgcHJpbnQocClcbiAgfVxufVxuXG5gYGAifQ== -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBcblxuRXggPC0gdW5pcXVlKERpZmZ1c2lvblByb2ZpbGVzJEV4cHQpXG4jIEludmVyZkRhdGEgPC0gc2VsZWN0KERpZmZ1c2lvblByb2ZpbGVzLCB4LCBFeHB0KVxuIyBUZW1wIDwtIHZlY3Rvcihtb2RlID0gXCJkb3VibGVcIiwgbGVuZ3RoID0gNTUzKVxuZm9yIChpIGluIHNlcV9hbG9uZyhFeCkpIHtcbiAgZm9yIChqIGluIHNlcV9hbG9uZyhPeGlkZXMpKSB7XG4gICAgRGlmZnVzaW9uUHJvZmlsZXMkaW52ZXJmIDwtIGVyZmludigxLShEaWZmdXNpb25Qcm9maWxlcyRDb25jZW50cmF0aW9uL0MwaW5pdFtqXSkpXG4gICAgcCA8LSBnZ3Bsb3QoRGlmZnVzaW9uUHJvZmlsZXMsIGFlcyh4LCBDb25jZW50cmF0aW9uKSkgK1xuICAgICAgZ2VvbV9wb2ludCgpXG4gICAgcHJpbnQocClcbiAgfVxufVxuXG5gYGAifQ== -->
 <pre class="r"><code># 
-library(pracma)
-C0init &lt;- c(76.33,12.83,3.33,4.80,1.14,0.02,0.07,1.46,0.01,0.01)
+
 Ex &lt;- unique(DiffusionProfiles$Expt)
 # InverfData &lt;- select(DiffusionProfiles, x, Expt)
 # Temp &lt;- vector(mode = &quot;double&quot;, length = 553)
@@ -1803,8 +1796,12 @@ for (i in seq_along(Ex)) {
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlRpdGFuaXRlIGRpc3NvbHV0aW9uOiBhbmFseXNpcyBvZiBkaWZmdXNpb24gcHJvZmlsZXMiDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpgYGB7cn0NCmxpYnJhcnkodGlkeXZlcnNlLCB3YXJuLmNvbmZsaWN0cyA9IEZBTFNFKQ0Kc2V0d2QoIkM6L1VzZXJzL2F5ZXJzai9PbmVEcml2ZSAtIFZhbmRlcmJpbHQvUGFwZXJzL1NwaGVuZVNvbHViaWxpdHkvRGF0YUFuYWx5c2lzL1RpdGFuaXRlRXhwdHMiKQ0KRGlmZnVzaW9uUHJvZmlsZXMgPC0gcmVhZF9jc3YoIkRpZmZ1c2lvblByb2ZpbGVzLmNzdiIpDQpgYGANCmBgYHtyfQ0KIyBHYXRoZXIgYWZ0ZXIgY2FsY3VsYXRpbmcgaW52ZXJzZSBlcnJvciBmdW5jdGlvbj8NCk94aWRlcyA8LSBjKCJTaU8yIiwgIkFsMk8zIiwgIk5hMk8iLCAiSzJPIiwgIkNhTyIsICJGZU8iLCAiTWdPIiwgIlRpTzIiLCAiTW5PIiwgIlAyTzUiKQ0KRGlmZnVzaW9uUHJvZmlsZXMgPC0gRGlmZnVzaW9uUHJvZmlsZXMgJT4lDQpnYXRoZXIoYWxsX29mKE94aWRlcyksIGtleSA9ICJPeGlkZSIsIHZhbHVlID0gIkNvbmNlbnRyYXRpb24iKQ0KYGBgDQoNCmBgYHtyfQ0KIyANCmxpYnJhcnkocHJhY21hKQ0KQzBpbml0IDwtIGMoNzYuMzMsMTIuODMsMy4zMyw0LjgwLDEuMTQsMC4wMiwwLjA3LDEuNDYsMC4wMSwwLjAxKQ0KRXggPC0gdW5pcXVlKERpZmZ1c2lvblByb2ZpbGVzJEV4cHQpDQojIEludmVyZkRhdGEgPC0gc2VsZWN0KERpZmZ1c2lvblByb2ZpbGVzLCB4LCBFeHB0KQ0KIyBUZW1wIDwtIHZlY3Rvcihtb2RlID0gImRvdWJsZSIsIGxlbmd0aCA9IDU1MykNCmZvciAoaSBpbiBzZXFfYWxvbmcoRXgpKSB7DQogIGZvciAoaiBpbiBzZXFfYWxvbmcoT3hpZGVzKSkgew0KICAgIERpZmZ1c2lvblByb2ZpbGVzJGludmVyZiA8LSBlcmZpbnYoMS0oRGlmZnVzaW9uUHJvZmlsZXMkQ29uY2VudHJhdGlvbi9DMGluaXRbal0pKQ0KICAgIHAgPC0gZ2dwbG90KERpZmZ1c2lvblByb2ZpbGVzLCBhZXMoeCwgQ29uY2VudHJhdGlvbikpICsNCiAgICAgIGdlb21fcG9pbnQoKQ0KICAgIHByaW50KHApDQogIH0NCn0NCg0KYGBgDQoNCg==</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIlRpdGFuaXRlIGRpc3NvbHV0aW9uOiBhbmFseXNpcyBvZiBkaWZmdXNpb24gcHJvZmlsZXMiDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpgYGB7cn0NCmxpYnJhcnkodGlkeXZlcnNlLCB3YXJuLmNvbmZsaWN0cyA9IEZBTFNFKQ0Kc2V0d2QoIkM6L1VzZXJzL2F5ZXJzai9PbmVEcml2ZSAtIFZhbmRlcmJpbHQvUGFwZXJzL1NwaGVuZVNvbHViaWxpdHkvRGF0YUFuYWx5c2lzL1RpdGFuaXRlRXhwdHMiKQ0KRGlmZnVzaW9uUHJvZmlsZXMgPC0gcmVhZF9jc3YoIkRpZmZ1c2lvblByb2ZpbGVzLmNzdiIpDQpsaWJyYXJ5KHByYWNtYSkNCkMwaW5pdCA8LSBjKDc2LjMzLDEyLjgzLDMuMzMsNC44MCwxLjE0LDAuMDIsMC4wNywxLjQ2LDAuMDEsMC4wMSkNCmBgYA0KYGBge3J9DQojIEdhdGhlciBhZnRlciBjYWxjdWxhdGluZyBpbnZlcnNlIGVycm9yIGZ1bmN0aW9uPw0KT3hpZGUgPC0gYygiU2lPMiIsICJBbDJPMyIsICJOYTJPIiwgIksyTyIsICJDYU8iLCAiRmVPIiwgIk1nTyIsICJUaU8yIiwgIk1uTyIsICJQMk81IikNCkRpZmZ1c2lvblByb2ZpbGVzIDwtIERpZmZ1c2lvblByb2ZpbGVzICU+JQ0KZ2F0aGVyKGFsbF9vZihPeGlkZSksIGtleSA9ICJPeGlkZSIsIHZhbHVlID0gIkNvbmNlbnRyYXRpb24iKQ0KZ3JvdXBfYnkoRXhwdCwgT3hpZGUpDQpzdW1tYXJpc2UoaW52ZXJmID0gZXJmaW52KDEtKENvbmNlbnRyYXRpb24vQzBpbml0W2pdKSkpDQpgYGANCg0KYGBge3J9DQojIA0KDQpFeCA8LSB1bmlxdWUoRGlmZnVzaW9uUHJvZmlsZXMkRXhwdCkNCiMgSW52ZXJmRGF0YSA8LSBzZWxlY3QoRGlmZnVzaW9uUHJvZmlsZXMsIHgsIEV4cHQpDQojIFRlbXAgPC0gdmVjdG9yKG1vZGUgPSAiZG91YmxlIiwgbGVuZ3RoID0gNTUzKQ0KZm9yIChpIGluIHNlcV9hbG9uZyhFeCkpIHsNCiAgZm9yIChqIGluIHNlcV9hbG9uZyhPeGlkZXMpKSB7DQogICAgRGlmZnVzaW9uUHJvZmlsZXMkaW52ZXJmIDwtIGVyZmludigxLShEaWZmdXNpb25Qcm9maWxlcyRDb25jZW50cmF0aW9uL0MwaW5pdFtqXSkpDQogICAgcCA8LSBnZ3Bsb3QoRGlmZnVzaW9uUHJvZmlsZXMsIGFlcyh4LCBDb25jZW50cmF0aW9uKSkgKw0KICAgICAgZ2VvbV9wb2ludCgpDQogICAgcHJpbnQocCkNCiAgfQ0KfQ0KDQpgYGANCg0KYGBge3J9DQoNCmBgYA0KDQo=</div>
 
 
 

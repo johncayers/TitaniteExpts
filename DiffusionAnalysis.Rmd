@@ -7,18 +7,21 @@ output: html_notebook
 library(tidyverse, warn.conflicts = FALSE)
 setwd("C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/DataAnalysis/TitaniteExpts")
 DiffusionProfiles <- read_csv("DiffusionProfiles.csv")
+library(pracma)
+C0init <- c(76.33,12.83,3.33,4.80,1.14,0.02,0.07,1.46,0.01,0.01)
 ```
 ```{r}
 # Gather after calculating inverse error function?
-Oxides <- c("SiO2", "Al2O3", "Na2O", "K2O", "CaO", "FeO", "MgO", "TiO2", "MnO", "P2O5")
+Oxide <- c("SiO2", "Al2O3", "Na2O", "K2O", "CaO", "FeO", "MgO", "TiO2", "MnO", "P2O5")
 DiffusionProfiles <- DiffusionProfiles %>%
-gather(all_of(Oxides), key = "Oxide", value = "Concentration")
+gather(all_of(Oxide), key = "Oxide", value = "Concentration")
+group_by(Expt, Oxide)
+summarise(inverf = erfinv(1-(Concentration/C0init[j])))
 ```
 
 ```{r}
 # 
-library(pracma)
-C0init <- c(76.33,12.83,3.33,4.80,1.14,0.02,0.07,1.46,0.01,0.01)
+
 Ex <- unique(DiffusionProfiles$Expt)
 # InverfData <- select(DiffusionProfiles, x, Expt)
 # Temp <- vector(mode = "double", length = 553)
@@ -30,6 +33,10 @@ for (i in seq_along(Ex)) {
     print(p)
   }
 }
+
+```
+
+```{r}
 
 ```
 

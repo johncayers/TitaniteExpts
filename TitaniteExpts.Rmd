@@ -75,7 +75,7 @@ plot(fit)
 ```{r}
 # Experiments 29, 30 & 31 are identified as outliers. They were Danny's earliest experiments, and were all run at 1300C.
 
-RegModel <- select(CationFractions, Model, Expt, TiO2, InvTK, C)
+RegModel <- select(CationFractions, Model, Expt, TiO2, InvTK, M, C)
 RegModel <- slice(RegModel, -(29:31))
 fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
 summary(fit)
@@ -95,13 +95,23 @@ write.csv(RegModel, "ExptsInModel.csv")
 
 ```{r}
 # Try filtering out experiments with Model = "N"
-RegModel <- select(CationFractions, Model, Expt, TiO2, InvTK, C)
+RegModel <- select(CationFractions, Model, Expt, TiO2, InvTK, M, C)
 RegModel <- filter(RegModel, Model == "Y")
 fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
 # 6 fewer experiments increases r^2 to 0.98
 ```
+
+```{r}
+# See if M fits as well
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+
+```
+
+
 ```{r}
 # Calculate model TiO2 concentrations and errors
 CationFractions <- CationFractions %>%
