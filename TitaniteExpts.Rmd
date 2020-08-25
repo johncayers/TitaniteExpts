@@ -66,6 +66,15 @@ cor(CorrTest)
 ```
 
 ```{r}
+library(leaps)
+leaps <- regsubsets(TiO2 ~ TC + Pkb + H2O + M + FM + C + InvTK, data = CationFractions, nbest = 2) 
+plot(leaps, scale = "adjr2")
+summary(leaps)
+
+```
+
+
+```{r}
 fit <- lm(TiO2 ~ C + InvTK, data = CationFractions)
 summary(fit)
 plot(fit)
@@ -123,7 +132,7 @@ CationFractions <- CationFractions %>%
 
 ```{r}
 # Create model output table
-TiO2ModelTable <- select(CationFractions, Model, Expt, eCa, C, InvTK, TiO2, ModelTiO2, ModelTiO2SD)
+TiO2ModelTable <- select(CationFractions, Model, Expt, eCa, C, M, InvTK, TiO2, ModelTiO2, ModelTiO2SD)
 write.csv(TiO2ModelTable, file = "TiO2ModelTable.csv")
 ```
 

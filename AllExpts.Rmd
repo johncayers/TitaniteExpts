@@ -63,8 +63,18 @@ cor(CorrTest)
 ```
 
 ```{r}
+# Subsets regression to find optimal set of parameters
+library(leaps)
+leaps <- regsubsets(TiO2 ~ TC + Pkb + M + FM + C + InvTK, data = CationFractions, nbest = 2) 
+plot(leaps, scale = "adjr2")
+# summary(leaps)
+# subsets(leaps, statistic = "cp", main = "Cp plot for All subsets regression")
+# abline(1,1,lty=2,col="red")
+```
+
+```{r}
 RegModel <- CationFractions
-RegModel <- filter(RegModel, Expt != c("SpDis_1", "SpDis_2", "SpDis_3", "ASI200"))
+RegModel <- filter(RegModel, Expt != c("SpDis_1", "SpDis_2", "SpDis_3"))
 fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
@@ -102,6 +112,8 @@ RegModel <- slice(RegModel, -(40))
 fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
+influencePlot(fit, id.method="identify", main="Influence Plot", sub="Circle size is proportional to Cook's distance")
+# Observations depicted as large circles may have a disproportionate influence on the parameter estimates of the model. Points with Hat values above 0.2 have high leverage.
 ```
 
 
@@ -109,7 +121,6 @@ plot(fit)
 # See how fit with C parameter compares
 fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
 summary(fit)
-plot(fit)
 # Model with C has the same fit as M: multiple r^2 = 0.96.
 ```
 
@@ -126,19 +137,24 @@ RegModel <- RegModel %>%
 ```
 
 ```{r}
+library(plotly)
 ggplot(RegModel, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper, color=Source)) +
   geom_pointrange() +
   geom_abline(slope=1, intercept=0)
+# Convert it to an interactive plot
+ggplotly()
 ```
 
 ```{r}
 ggplot(RegModel, aes(x=M, y=TiO2, color=Source)) +
   geom_point()
+  ggplotly()
 ```
 
 ```{r}
 ggplot(RegModel, aes(x=InvTK, y=TiO2, color=Source)) +
   geom_point()
+  ggplotly()
 ```
 
 ```{r}
