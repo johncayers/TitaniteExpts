@@ -1,0 +1,143 @@
+---
+title: 'Titanite solubility experiments: Analysis of EDS data'
+author: "John C. Ayers"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(tidyverse, warn.conflicts = FALSE)
+setwd("C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/DataAnalysis/TitaniteExpts")
+# Import normalized EDS glass analyses
+TitaniteExpts <- read_csv("TitaniteExptsV2.csv")
+```
+```{r}
+# Convert oxides to cation concentrations
+TitaniteCations <- TitaniteExpts %>%
+  mutate(
+    Si = SiO2/60.0848,
+    Al = 2*Al2O3/101.961,
+    Na = 2*Na2O/61.979,
+    K = 2*K2O/94.194,
+    Ca = CaO/56.0794,
+    Fe = FeO/71.8464,
+    Mg = MgO/40.3044,
+    Ti = TiO2/79.8988,
+    Mn = MnO/70.9374,
+    P = 2*P2O5/141.945,
+    CationSum = (Si + Al + Na + K + Ca + Fe + Mg + Ti + Mn + P)
+             )
+```
+
+```{r}
+# Calculate cation fractions
+CationFractions <- select(TitaniteCations, Expt, SM, TC, Pkb, H2O, TimeH, Titanite, Rutile, TiO2, Si:CationSum)
+f <- match("Si", names(CationFractions))
+l <- match("P", names(CationFractions))
+for (i in f:l) {
+  CationFractions[(i)] = CationFractions[(i)]/CationFractions$CationSum
+}
+
+```
+
+
+```{r}
+# Calculate melt composition parameters
+CationFractions <- CationFractions %>%
+  mutate(
+    M = (Na + K + 2*Ca)/(Si*Al),
+    FM = (Na + K + 2*(Ca + Fe + Mg))/(Si*Al),
+    TK = TC+273.15,
+    InvTK = 1/TK,
+    PInvTK = (Pkb*1000 - 1)*InvTK
+    )
+```
+
+
+```{r}
+NoTitanite <- filter(CationFractions, Titanite == "N")
+CationFractions <- filter(CationFractions, Titanite == "Y")
+
+# Correlation matrix
+CorrTest <- select(CationFractions, TiO2, Pkb, H2O, Ca, Al, M:PInvTK)
+cor(CorrTest)
+# Glass TiO2 concentration is most highly correlated with melt composition parameter C, but M fits nearly as well.
+# Scatterplot matrices
+library(car)
+scatterplotMatrix(~ Ti + Ca + Al + InvTK + TK + M, data = CationFractions, smooth = FALSE)
+
+```
+
+```{r}
+library(leaps)
+leaps <- regsubsets(TiO2 ~ TC + Pkb + H2O + M + FM + InvTK, data = CationFractions, nbest = 2) 
+plot(leaps, scale = "adjr2")
+# summary(leaps)
+```
+
+
+```{r}
+fit <- lm(TiO2 ~ M + InvTK + Pkb, data = CationFractions)
+summary(fit)
+# Pkb is not significant, so drop
+fit <- lm(TiO2 ~ M + InvTK, data = CationFractions)
+summary(fit)
+plot(fit)
+
+```
+
+```{r}
+RegModel <- select(CationFractions, Expt, TiO2, InvTK, M)
+DelExpts <- c("SpDis_1", "SpDis_2", "SpDis_4")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+# I think this is our best model. Removing more experiments doesn't significantly improve fit.
+write.csv(RegModel, "ExptsInModel.csv")
+```
+
+```{r}
+# Calculate model TiO2 concentrations and errors
+RegModel <- RegModel %>%
+  mutate(
+   ModelTiO2 = (3.47*M - 8868*InvTK + 3.47),
+   ModelTiO2SD = ModelTiO2*sqrt((0.22/3.47)^2 + (1575/8868)^2),
+   lower = ModelTiO2 - ModelTiO2SD,
+   upper = ModelTiO2 + ModelTiO2SD
+  )
+```
+
+```{r}
+library(plotly)
+ggplot(RegModel, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper)) +
+  geom_pointrange() +
+  geom_abline(slope=1, intercept=0)
+# Convert it to an interactive plot
+ggplotly()
+```
+
+```{r}
+# log-log plot
+ggplot(RegModel, aes(x=log(TiO2), y=log(ModelTiO2), ymin=log(lower), ymax=log(upper))) +
+  geom_pointrange() +
+  geom_abline(slope=1, intercept=0)
+ggplotly()
+```
+
+
+```{r}
+ggplot(RegModel, aes(x=M, y=TiO2)) +
+  geom_point()
+  ggplotly()
+```
+
+```{r}
+# Create model output table
+TiO2ModelTable <- select(RegModel, Expt, M, InvTK, TiO2, ModelTiO2, ModelTiO2SD)
+write.csv(TiO2ModelTable, file = "TiO2ModelTable.csv")
+```
+
+
+

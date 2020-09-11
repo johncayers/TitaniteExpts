@@ -74,24 +74,24 @@ plot(leaps, scale = "adjr2")
 
 ```{r}
 RegModel <- CationFractions
-RegModel <- filter(RegModel, Expt != c("SpDis_1", "SpDis_2", "SpDis_3"))
+DelExpts <- c("SpDis_1", "SpDis_2", "SpDis_3", "ASI200")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
 ```
 
 ```{r}
-RegModel <- slice(RegModel, -(56))
-RegModel <- slice(RegModel, -(29))
+DelExpts <- c("SpG_28", "SH2K")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
 ```
 
 ```{r}
-RegModel <- slice(RegModel, -(60))
-RegModel <- slice(RegModel, -(53))
-RegModel <- slice(RegModel, -(41))
+DelExpts <- c("HL220-60000", "SH2Na")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
@@ -99,16 +99,16 @@ plot(fit)
 
 
 ```{r}
-RegModel <- slice(RegModel, -(58))
-RegModel <- slice(RegModel, -(52))
-RegModel <- slice(RegModel, -(22))
+DelExpts <- c("HL220-75000", "DAC")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
 ```
 
 ```{r}
-RegModel <- slice(RegModel, -(40))
+DelExpts <- c("SpDis_15", "RHY")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
@@ -144,6 +144,35 @@ ggplot(RegModel, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper, color=Source))
 # Convert it to an interactive plot
 ggplotly()
 ```
+
+```{r}
+# log-log plot
+ggplot(RegModel, aes(x=log(TiO2), y=log(ModelTiO2), ymin=log(lower), ymax=log(upper))) +
+  geom_pointrange() +
+  geom_abline(slope=1, intercept=0)
+ggplotly()
+
+```
+
+```{r}
+# Need to delete the two experiments with the lowest TiO2, since they don't fall on the trend and are likely below the detection limit
+DelExpts <- c("ND-002-18", "ND-002-20")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+```{r}
+# log-log plot
+ggplot(RegModel, aes(x=log(TiO2), y=log(ModelTiO2), ymin=log(lower), ymax=log(upper), color=Source)) +
+  geom_pointrange() +
+  geom_abline(slope=1, intercept=0) +
+  xlim(-1,2.5) +
+  ylim(-1,2.5)
+ggplotly()
+```
+
 
 ```{r}
 ggplot(RegModel, aes(x=M, y=TiO2, color=Source)) +

@@ -49,7 +49,8 @@ CationFractions <- CationFractions %>%
     M = (Na + K + 2*Ca)/(Si*Al),
     FM = (Na + K + 2*(Ca + Fe + Mg))/(Si*Al),
     C = (10*eCa)/(Si*Al),
-    InvTK = 1/(TC+273.15)
+    InvTK = 1/(TC+273.15),
+    PInvTK = (Pkb*1000 - 1)*InvTK
     )
 ```
 
@@ -57,9 +58,9 @@ CationFractions <- CationFractions %>%
 ```{r}
 # Scatterplot matrices
 library(car)
-scatterplotMatrix(~ Ti + Ca + Al + InvTK + M + FM + C, data = CationFractions, groups = CationFractions$Model, smooth = FALSE)
+scatterplotMatrix(~ Ti + Ca + Al + InvTK + PInvTK + M + FM + C, data = CationFractions, groups = CationFractions$Model, smooth = FALSE)
 # Correlation matrix
-CorrTest <- select(CationFractions, TiO2, M:InvTK)
+CorrTest <- select(CationFractions, TiO2, TC, Pkb, M:PInvTK)
 cor(CorrTest)
 # Glass TiO2 concentration is most highly correlated with melt composition parameter C.
 
@@ -69,8 +70,7 @@ cor(CorrTest)
 library(leaps)
 leaps <- regsubsets(TiO2 ~ TC + Pkb + H2O + M + FM + C + InvTK, data = CationFractions, nbest = 2) 
 plot(leaps, scale = "adjr2")
-summary(leaps)
-
+# summary(leaps)
 ```
 
 

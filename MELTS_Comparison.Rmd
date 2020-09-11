@@ -1,0 +1,30 @@
+---
+title: "MELTS comparison"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+setwd("C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/DataAnalysis/TitaniteExpts")
+MELTSdata <- read_csv("MELTS_Comparison.csv")
+```
+
+```{r}
+# First filter out experiments that are not titanite-saturated
+# MELTSonly <- filter(MELTSdata, Source == "MELTS") 
+MELTS <- filter(MELTSdata, Titanite == "Y") %>%
+     select(Expt, Source, TiO2) %>%
+    pivot_wider(names_from = Source, values_from = TiO2) %>%
+  rename(TiO2ThisStudy = ThisStudy, TiO2MELTS = MELTS)
+
+fit <- lm(TiO2ThisStudy ~ TiO2MELTS, data = MELTS)
+summary(fit)
+
+# Have to add MELTS results for SpG30
+ggplot(MELTS, aes(x=ThisStudy, y = MELTS)) +
+  geom_point()
+
+
+```
+
