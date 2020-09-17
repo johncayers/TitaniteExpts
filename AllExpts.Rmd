@@ -22,7 +22,6 @@ TitaniteCations <- AllExpts %>%
     Fe = FeO/71.8464,
     Mg = MgO/40.3044,
     Ti = TiO2/79.8988,
-    eCa = (CaO/56.0794 - Al2O3/101.961 + K2O/94.194 + Na2O/61.979),
     CationSum = (Si + Al + Na + K + Ca + Fe + Mg + Ti)
      )
 ```
@@ -31,7 +30,7 @@ TitaniteCations <- AllExpts %>%
 # Calculate cation fractions
 CationFractions <- TitaniteCations
 f <- match("Si", names(CationFractions))
-l <- match("eCa", names(CationFractions))
+l <- match("Ti", names(CationFractions))
 for (i in f:l) {
   CationFractions[(i)] = CationFractions[(i)]/CationFractions$CationSum
 }
@@ -44,19 +43,20 @@ CationFractions <- CationFractions %>%
   mutate(
     M = (Na + K + 2*Ca)/(Si*Al),
     FM = (Na + K + 2*(Ca + Fe + Mg))/(Si*Al),
-    C = (10*eCa)/(Si*Al),
-    InvTK = 1/(TC+273.15)
+    TK = TC+273.15,
+    InvTK = 1/TK,
+    PInvTK = (Pkb*1000 - 1)*InvTK
     )
 ```
 
 ```{r}
 # Scatterplot matrices
 library(car)
-scatterplotMatrix(~ Ti + Ca + Al + InvTK + M + FM + C, data = CationFractions, groups = CationFractions$Source, smooth = FALSE)
+scatterplotMatrix(~ Ti + Ca + InvTK + TK + M, data = CationFractions, groups = CationFractions$Source, smooth = FALSE)
 dev.copy(png,"ScatterPlotMatrixAllExpts.png")
 dev.off()   
 # Correlation matrix
-CorrTest <- select(CationFractions, TiO2, M:InvTK)
+CorrTest <- select(CationFractions, TiO2, Pkb, Ca, M:PInvTK)
 cor(CorrTest)
 # LEPR compositions show bimodal distribution. 
 # LEPR data show different dependence on C than our data. 
@@ -65,7 +65,7 @@ cor(CorrTest)
 ```{r}
 # Subsets regression to find optimal set of parameters
 library(leaps)
-leaps <- regsubsets(TiO2 ~ TC + Pkb + M + FM + C + InvTK, data = CationFractions, nbest = 2) 
+leaps <- regsubsets(TiO2 ~ TK + Pkb + M + FM + InvTK, data = CationFractions, nbest = 2) 
 plot(leaps, scale = "adjr2")
 # summary(leaps)
 # subsets(leaps, statistic = "cp", main = "Cp plot for All subsets regression")
@@ -76,6 +76,9 @@ plot(leaps, scale = "adjr2")
 RegModel <- CationFractions
 DelExpts <- c("SpDis_1", "SpDis_2", "SpDis_3", "ASI200")
 RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + InvTK + Pkb + TK, data = RegModel)
+summary(fit)
+# Drop Pkb and TK, not significant
 fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
@@ -119,8 +122,8 @@ influencePlot(fit, id.method="identify", main="Influence Plot", sub="Circle size
 
 ```{r}
 # See how fit with C parameter compares
-fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
-summary(fit)
+# fit <- lm(TiO2 ~ C + InvTK, data = RegModel)
+# summary(fit)
 # Model with C has the same fit as M: multiple r^2 = 0.96.
 ```
 

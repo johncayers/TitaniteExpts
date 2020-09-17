@@ -1,0 +1,218 @@
+---
+title: 'Titanite solubility: Flanagan + LEPR experiments'
+output:
+  html_document:
+    df_print: paged
+---
+```{r}
+# Add LEPR data to our data and fit a new model ----------
+library(tidyverse, warn.conflicts = FALSE)
+library(plotly)
+library(car)
+library(leaps)
+setwd("C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/DataAnalysis/TitaniteExpts")
+AllExpts <- read_csv("AllExpts.csv")
+# Contains 32 of 39 DF experiments
+```
+
+```{r}
+# Calculate concentrations of cations ------------------
+Cations <- AllExpts %>%
+  mutate(
+    Si = SiO2/60.0848,
+    Al = 2*Al2O3/101.961,
+    Na = 2*Na2O/61.979,
+    K = 2*K2O/94.194,
+    Ca = CaO/56.0794,
+    Fe = FeO/71.8464,
+    Mg = MgO/40.3044,
+    Ti = TiO2/79.8988,
+    CationSum = (Si + Al + Na + K + Ca + Fe + Mg + Ti)
+     )
+```
+
+```{r}
+# Calculate cation fractions -------------------
+CationFractions <- Cations
+f <- match("Si", names(CationFractions))
+l <- match("Ti", names(CationFractions))
+for (i in f:l) {
+  CationFractions[(i)] = CationFractions[(i)]/CationFractions$CationSum
+}
+
+```
+
+```{r}
+# Calculate melt composition parameters -------------------
+CationFractions <- CationFractions %>%
+  mutate(
+    M = (Na + K + 2*Ca)/(Si*Al),
+    FM = (Na + K + 2*(Ca + Fe + Mg))/(Si*Al),
+    TK = TC+273.15,
+    InvTK = 1/TK,
+    PInvTK = (Pkb*1000 - 1)*InvTK
+    )
+# Filter out experiments with no titanite in run products
+NoTitaniteCationFractions <- filter(CationFractions, Titanite == "N")
+TitaniteCationFractions <- filter(CationFractions, Titanite == "Y")
+```
+
+```{r}
+# Scatterplot matrices ---------------------
+scatterplotMatrix(~ Ti + Ca + InvTK + TK + M, data = TitaniteCationFractions, groups = TitaniteCationFractions$Source, smooth = FALSE)
+dev.copy(png,"ScatterPlotMatrixAllExpts.png")
+dev.off()   
+
+```
+
+```{r}
+# Correlation matrix ---------------------
+CorrTest <- select(TitaniteCationFractions, TiO2, Pkb, Ca, M:PInvTK)
+cor(CorrTest)
+# LEPR compositions show bimodal distribution. 
+# LEPR data show different dependence on C than our data. 
+```
+
+
+```{r}
+# Subsets regression --------------------------
+# to find optimal set of parameters 
+leaps <- regsubsets(TiO2 ~ TK + Pkb + M + FM + InvTK, data = TitaniteCationFractions, nbest = 2) 
+plot(leaps, scale = "adjr2")
+# summary(leaps)
+# subsets(leaps, statistic = "cp", main = "Cp plot for All subsets regression")
+# abline(1,1,lty=2,col="red")
+```
+
+```{r}
+# Preliminary model fit -----------------
+RegModel <- TitaniteCationFractions
+DelExpts <- c("SpDis_1", "SpDis_2", "SpDis_3", "ASI200")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + InvTK + Pkb + TK, data = RegModel)
+summary(fit)
+# Drop Pkb and TK, not significant
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+```{r}
+DelExpts <- c("SpG_28", "SH2K")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+```{r}
+DelExpts <- c("HL220-60000", "SH2Na")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+
+```{r}
+DelExpts <- c("HL220-75000", "DAC")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+```{r}
+DelExpts <- c("SpDis_15", "RHY")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+
+```
+
+```{r}
+# Calculate model TiO2 concentrations and errors -----------
+RegModel <- RegModel %>%
+  mutate(
+   TiO2Saturation = (1.012*M - 7429*InvTK + 5.966),
+   TiO2SaturationSD = TiO2Saturation*sqrt((0.03415/1.012)^2 + (1005/7429)^2),
+   lower = TiO2Saturation - TiO2SaturationSD,
+   upper = TiO2Saturation + TiO2SaturationSD
+  )
+```
+
+```{r}
+# log-log plot
+ggplot(RegModel, aes(x=log(TiO2), y=log(TiO2Saturation), ymin=log(lower), ymax=log(upper))) +
+  geom_pointrange() +
+  geom_abline(slope=1, intercept=0)
+# Convert it to an interactive plot
+ggplotly()
+
+```
+
+```{r}
+# Final model fit ---------------------
+# Need to delete the two experiments with the lowest TiO2, since they don't fall on the trend and are likely below the detection limit
+DelExpts <- c("ND-002-18", "ND-002-20")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
+summary(fit)
+plot(fit)
+influencePlot(fit, main="Influence Plot", sub="Circle size is proportional to Cook's distance")
+# Observations depicted as large circles may have a disproportionate influence on the parameter estimates of the model. Points with Hat values above 0.2 have high leverage.
+```
+```{r}
+# Calculate final model TiO2 concentrations and errors -----------------
+RegModel <- RegModel %>%
+  mutate(
+   TiO2Saturation = (1.017*M - 7008*InvTK + 5.636),
+   TiO2SaturationSD = TiO2Saturation*sqrt((0.03512/1.017)^2 + (1161/7008)^2),
+   lower = TiO2Saturation - TiO2SaturationSD,
+   upper = TiO2Saturation + TiO2SaturationSD
+  )
+```
+
+```{r}
+# log-log plot of model fit -------------
+ggplot(RegModel, aes(x=log(TiO2), y=log(TiO2Saturation), ymin=log(lower), ymax=log(upper), color=Source)) +
+  geom_pointrange() +
+  geom_abline(slope=1, intercept=0) +
+  xlim(-1,2.5) +
+  ylim(-1,2.5)
+```
+
+
+```{r}
+# TiO2-M plot -------------------
+ggplot(RegModel, aes(x=M, y=TiO2, color=Source)) +
+  geom_point()
+```
+
+```{r}
+# TiO2-InvTK plot -------------------------
+ggplot(RegModel, aes(x=InvTK, y=TiO2, color=Source)) +
+  geom_point()
+```
+
+```{r}
+# Model output table -------------------
+TiO2AllExptsModelTable <- select(RegModel, Source, Expt, M, InvTK, TiO2, TiO2Saturation, TiO2SaturationSD)
+write.csv(TiO2AllExptsModelTable, file = "TiO2AllExptsModelTable.csv")
+```
+
+```{r}
+# Titanite saturation test -----------------
+# Use Model equation to test whether Expts in "NoTitanite" without rutile are undersaturated. All should have been saturated. 
+NoTitaniteModel <- filter(NoTitaniteCationFractions, Rutile == "N") %>%
+  mutate(
+   TiO2Saturation = (1.017*M - 7008*InvTK + 5.636),
+   TiO2SaturationSD = TiO2Saturation*sqrt((0.03512/1.017)^2 + (1161/7008)^2),
+   lower = TiO2Saturation - TiO2SaturationSD,
+   upper = TiO2Saturation + TiO2SaturationSD
+  )
+CompareTiO2 <- select(NoTitaniteModel, Expt, TiO2, TiO2Saturation)
+CompareTiO2
+```
+

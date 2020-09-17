@@ -32,7 +32,7 @@ TitaniteCations <- TitaniteExpts %>%
 
 ```{r}
 # Calculate cation fractions
-CationFractions <- select(TitaniteCations, Expt, SM, TC, Pkb, H2O, TimeH, Titanite, Rutile, TiO2, Si:CationSum)
+CationFractions <- select(TitaniteCations, Expt, Type, SM, TC, Pkb, H2O, TimeH, Titanite, Rutile, TiO2, Si:CationSum)
 f <- match("Si", names(CationFractions))
 l <- match("P", names(CationFractions))
 for (i in f:l) {
@@ -57,38 +57,56 @@ CationFractions <- CationFractions %>%
 
 ```{r}
 NoTitanite <- filter(CationFractions, Titanite == "N")
-CationFractions <- filter(CationFractions, Titanite == "Y")
-
-# Correlation matrix
-CorrTest <- select(CationFractions, TiO2, Pkb, H2O, Ca, Al, M:PInvTK)
-cor(CorrTest)
-# Glass TiO2 concentration is most highly correlated with melt composition parameter C, but M fits nearly as well.
-# Scatterplot matrices
-library(car)
-scatterplotMatrix(~ Ti + Ca + Al + InvTK + TK + M, data = CationFractions, smooth = FALSE)
-
+CationFractionsTitanite <- filter(CationFractions, Titanite == "Y")
+# Plot time series
+CationFractionsTitanite$Isotherm <- factor(CationFractionsTitanite$TC)
+SMplot <- c("GSP + AGV", "PST", "GSP")
+for (i in seq_along(SMplot)) {
+  Comp <- filter(CationFractionsTitanite, SM == SMplot[i])
+p <- ggplot(Comp, aes(x=TimeH, y=TiO2, shape=Isotherm, color=Isotherm)) +
+  geom_point() +
+  labs(title = as.name(SMplot[i]))
+print(p)
+}
+# Time series a bit concerning, since many isotherms seem to have a negative slope, suggesting that titanite crystallization is kinetically inhibited.
 ```
 
 ```{r}
+# Correlation matrix
+CorrTest <- select(CationFractionsTitanite, TiO2, TimeH, Pkb, H2O, Ca,  M:PInvTK)
+cor(CorrTest)
+# Glass TiO2 concentration is positively correlated with melt composition parameter M and TK and negatively correlated with time and InvTK. 
+# Scatterplot matrices
+library(car)
+CationFractionsTitanite$Type <- factor(CationFractionsTitanite$Type)
+scatterplotMatrix(~ Ti + Ca + TimeH + InvTK + TK + M, data = CationFractionsTitanite, smooth = FALSE)
+```
+
+
+```{r}
 library(leaps)
-leaps <- regsubsets(TiO2 ~ TC + Pkb + H2O + M + FM + InvTK, data = CationFractions, nbest = 2) 
+leaps <- regsubsets(TiO2 ~ TC + Pkb + H2O + M + FM + InvTK, data = CationFractionsTitanite, nbest = 2) 
 plot(leaps, scale = "adjr2")
 # summary(leaps)
 ```
 
 
 ```{r}
-fit <- lm(TiO2 ~ M + InvTK + Pkb, data = CationFractions)
+fit <- lm(TiO2 ~ M + InvTK + Pkb, data = CationFractionsTitanite)
 summary(fit)
-# Pkb is not significant, so drop
-fit <- lm(TiO2 ~ M + InvTK, data = CationFractions)
-summary(fit)
-plot(fit)
 
 ```
 
 ```{r}
-RegModel <- select(CationFractions, Expt, TiO2, InvTK, M)
+# Pkb is not significant, so drop
+fit <- lm(TiO2 ~ M + InvTK, data = CationFractionsTitanite)
+summary(fit)
+plot(fit)
+```
+
+
+```{r}
+RegModel <- select(CationFractionsTitanite, Expt, Type, TiO2, InvTK, M)
 DelExpts <- c("SpDis_1", "SpDis_2", "SpDis_4")
 RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
@@ -102,16 +120,16 @@ write.csv(RegModel, "ExptsInModel.csv")
 # Calculate model TiO2 concentrations and errors
 RegModel <- RegModel %>%
   mutate(
-   ModelTiO2 = (3.47*M - 8868*InvTK + 3.47),
-   ModelTiO2SD = ModelTiO2*sqrt((0.22/3.47)^2 + (1575/8868)^2),
-   lower = ModelTiO2 - ModelTiO2SD,
-   upper = ModelTiO2 + ModelTiO2SD
+   TiO2saturation = (3.47*M - 8868*InvTK + 3.47),
+   TiO2saturationSD = TiO2saturation*sqrt((0.22/3.47)^2 + (1575/8868)^2),
+   lower = TiO2saturation - TiO2saturationSD,
+   upper = TiO2saturation + TiO2saturationSD
   )
 ```
 
 ```{r}
 library(plotly)
-ggplot(RegModel, aes(x=TiO2, y=ModelTiO2, ymin=lower, ymax=upper)) +
+ggplot(RegModel, aes(x=TiO2, y=TiO2saturation, ymin=lower, ymax=upper, shape = Type, color = Type)) +
   geom_pointrange() +
   geom_abline(slope=1, intercept=0)
 # Convert it to an interactive plot
@@ -120,24 +138,46 @@ ggplotly()
 
 ```{r}
 # log-log plot
-ggplot(RegModel, aes(x=log(TiO2), y=log(ModelTiO2), ymin=log(lower), ymax=log(upper))) +
+ggplot(RegModel, aes(x=log(TiO2), y=log(TiO2saturation), ymin=log(lower), ymax=log(upper), shape = Type, color = Type)) +
   geom_pointrange() +
   geom_abline(slope=1, intercept=0)
-ggplotly()
 ```
 
 
 ```{r}
-ggplot(RegModel, aes(x=M, y=TiO2)) +
+ggplot(RegModel, aes(x=M, y=TiO2, shape = Type, color = Type)) +
   geom_point()
-  ggplotly()
 ```
 
 ```{r}
 # Create model output table
-TiO2ModelTable <- select(RegModel, Expt, M, InvTK, TiO2, ModelTiO2, ModelTiO2SD)
+TiO2ModelTable <- select(RegModel, Expt, M, InvTK, TiO2, TiO2saturation, TiO2saturationSD)
 write.csv(TiO2ModelTable, file = "TiO2ModelTable.csv")
 ```
 
+```{r}
+# Use Model equation to test whether Expts in "NoTitanite" are undersaturated
+NoTitaniteModel <- filter(NoTitanite, Rutile == "N") %>%
+  mutate(
+   TiO2saturation = (3.47*M - 8868*InvTK + 3.47),
+   TiO2saturationSD = TiO2saturation*sqrt((0.22/3.47)^2 + (1575/8868)^2),
+   lower = TiO2saturation - TiO2saturationSD,
+   upper = TiO2saturation + TiO2saturationSD
+  )
+
+CompareTiO2 <- select(NoTitaniteModel, Expt, TiO2, TiO2saturation)
+CompareTiO2
+# NoTitaniteModel <- NoTitaniteModel%>%
+#   add_column(Agree = "?")
+# # Don't know why "N" is assigned but not "Y" in following loop
+# for (i in 1:nrow(NoTitaniteModel)) {
+#   if (NoTitaniteModel$TiO2saturation[i] > NoTitaniteModel$TiO2[i]) {
+#     NoTitanite$Agree[i] <- c("Y")
+#   }
+#   else {
+#     NoTitaniteModel$Agree[i] <- c("N")
+#   }
+# }
+```
 
 
