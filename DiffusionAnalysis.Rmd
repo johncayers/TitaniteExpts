@@ -5,23 +5,69 @@ output: html_notebook
 
 ```{r}
 library(tidyverse, warn.conflicts = FALSE)
-setwd("C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/DataAnalysis/TitaniteExpts")
-DiffusionProfiles <- read_csv("DiffusionProfiles.csv")
 library(pracma)
-C0init <- c(76.33,12.83,3.33,4.80,1.14,0.02,0.07,1.46,0.01,0.01)
+library(zoo)
+setwd("C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/DataAnalysis/TitaniteExpts")
+DiffusionProfiles <- read_csv("DiffusionProfilesV2.csv")
+Oxides <- c("SiO2", "Al2O3", "Na2O", "K2O", "CaO", "MgO", "TiO2")
+C0init <- c(76.33,12.83,3.33,4.80,1.14,0.07,1.46)
 ```
 ```{r}
-# Gather after calculating inverse error function?
-Oxide <- c("SiO2", "Al2O3", "Na2O", "K2O", "CaO", "FeO", "MgO", "TiO2", "MnO", "P2O5")
-DiffusionProfiles <- DiffusionProfiles %>%
-gather(all_of(Oxide), key = "Oxide", value = "Concentration")
-group_by(Expt, Oxide)
-summarise(inverf = erfinv(1-(Concentration/C0init[j])))
+Diffusion <- DiffusionProfiles %>%
+  gather(all_of(Oxide), key = "Oxide", value = "Conc") %>%
+  group_by(Expt, Oxide)
+# Workflow from Sphene Solubility Experiments Data v2 DF - JCA.xlsx
+# for i = Expt, for j = oxide
+# y = erfinv(1-Cx/C0)
+# extract linear portion of curve
+# fit straight line using lm
+# adjust C0 until intercept = 0
+# write C0 to output file
+Experiment <- unique(Diffusion$Expt)
+# Functions
+f <- function (d) {
+  m <- lm(y~x, as.data.frame(d))
+  return(coef(m)[2])
+}
+for (i in seq_along(Experiment)) {
+  Diffuse <- filter(Diffusion, Expt == Experiment[(i)])
+  for (j in seq_along(Oxides)) {
+    Diffuse <- filter(Diffuse, Oxide == Oxides[(j)])
+    x <- Diffuse$x
+    C0 <- C0init[(j)]
+    y <- erfinv(1-(Diffuse$Conc/C0))
+    # qplot(x, y, ylab = "erfinv(1-Cx/C0)")
+    profile <- as.data.frame(cbind(x,y))
+    # the following lines from https://stackoverflow.com/questions/46108100/how-to-find-the-linear-part-of-a-curve
+    co <- rollapply(profile, 3, f, by.column=F)
+    co.cl <- kmeans(co, 2)
+    b.points <- which(co.cl$cluster == match(max(co.cl$centers), co.cl$centers))+1
+    RES <- profile[b.points,]
+    # qplot(x,y,RES,ylab = "erfinv(1-Cx/C0)",geom_abline(lm(y~x,RES),col="blue"))
+    plot(profile, ylab = "erfinv(1-Cx/C0)")
+    points(RES,pch=15,col="red")
+    abline(lm(y~x,RES),col="blue")
+    xmax <- max(RES$x)
+    Diffused <- as.data.frame(cbind(Diffuse,y))
+    colnames(Diffused)[colnames(Diffused) == "...5"] <- "y"
+    Diffused <- filter(Diffused, x <= xmax)
+    Diffused <- ungroup(Diffused)
+    input <- select(Diffused, x, y)
+    int <- function (data) {
+      b <- lm(y~x, as.data.frame(data))
+      b <- coef(b)[1]
+      names(b) <- NULL
+    return(b)
+    }
+    b <- int(input)
+    best <- optim(par = b, fn = int, data = input)
+    best$par
+  }
+}
 ```
 
 ```{r}
 # 
-
 Ex <- unique(DiffusionProfiles$Expt)
 # InverfData <- select(DiffusionProfiles, x, Expt)
 # Temp <- vector(mode = "double", length = 553)
