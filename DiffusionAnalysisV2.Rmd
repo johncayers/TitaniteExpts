@@ -1,0 +1,84 @@
+---
+title: "Titanite dissolution: analysis of diffusion profiles"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse, warn.conflicts = FALSE)
+library(pracma)
+library(zoo)
+setwd("C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/DataAnalysis/TitaniteExpts")
+DiffusionProfiles <- read_csv("DiffusionProfilesV2.csv")
+Oxides <- c("SiO2", "Al2O3", "Na2O", "K2O", "CaO", "MgO", "TiO2")
+C0init <- c(76.33,12.83,3.33,4.80,1.14,0.07,1.46)
+```
+```{r}
+Diffusion <- DiffusionProfiles %>%
+  gather(all_of(Oxides), key = "Oxide", value = "Conc") %>%
+  group_by(Expt, Oxide)
+# Workflow from "EstimationSaturationConcentrationTiO2FromDiffusionProfiles.xlsx"
+
+Experiment <- unique(Diffusion$Expt)
+f <- function (d) {
+  m <- lm(y~x, as.data.frame(d))
+  return(coef(m)[2])
+}
+for (i in seq_along(Experiment)) {
+  Diffuse <- filter(Diffusion, Expt == Experiment[(i)])
+  for (j in seq_along(Oxides)) {
+    Diffuse <- filter(Diffuse, Oxide == Oxides[(j)])
+    x <- Diffuse$x
+    C0 <- C0init[(j)]
+    y <- erfinv(1-(Diffuse$Conc/C0))
+    # qplot(x, y, ylab = "erfinv(1-Cx/C0)")
+    profile <- as.data.frame(cbind(x,y))
+    # extract linear portion of curve. The following lines adapted from https://stackoverflow.com/questions/46108100/how-to-find-the-linear-part-of-a-curve
+    # This procedure seemed to work on TiO2, but it clearly is not robust
+    co <- rollapply(profile, 3, f, by.column=F)
+    co.cl <- kmeans(co, 2)
+    b.points <- which(co.cl$cluster == match(max(co.cl$centers), co.cl$centers))+1
+    RES <- profile[b.points,]
+    # ggplot(profile, aes(x=x, y=y)) +
+    #   ylab = "erfinv(1-Cx/C0)" +
+    #   geom_point(col="blue")
+      # geom_abline(lm(y~x,RES),col="red")
+    plot(profile, ylab = "erfinv(1-Cx/C0)")
+    title(str_c("Expt = ", Experiment[(i)], "  Oxide = ", Oxides[(j)]))
+    points(RES,pch=15,col="red")
+    xmax <- max(RES$x)
+    Diffused <- as.data.frame(cbind(Diffuse,y))
+    colnames(Diffused)[colnames(Diffused) == "...5"] <- "y"
+    Diffused <- filter(Diffused, x <= xmax)
+    Diffused <- ungroup(Diffused)
+    input <- select(Diffused, x, Conc, y)
+    # int <- function (CO, d) {
+    #   y <- erfinv(1-(d$Conc/C0))
+    #   b <- lm(y~x, as.data.frame(d))
+    #   b <- coef(b)[1]
+    #   names(b) <- NULL
+    #   return(b)
+    # }
+    # # Initial intercept value
+    # b <- int(C0, input)
+    # # Use optimization to adjust C0 until intercept = 0
+    # best <- optim(par = C0, fn = int(C0, input), data = input)
+    # best$par
+  }
+}
+```
+
+
+```{r}
+# y = f(x) = erfinv(1-(C(x)/C0) = mx + b
+f = function (a, C0) {
+erfinv(1-(C(x)/C0)) - a[1]*x - a[2]
+return(a, C0)
+}
+# adjust C0 until [a2] = 0
+optim(c(1,1,1),f)
+best$par
+
+
+```
+
+

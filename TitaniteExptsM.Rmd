@@ -19,7 +19,6 @@ library(leaps)
 ```
 
 ```{r import data}
-setwd("C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/DataAnalysis/TitaniteExpts")
 # Import normalized EDS glass analyses
 TitaniteExpts <- read_csv("TitaniteExptsV2.csv")
 ```
