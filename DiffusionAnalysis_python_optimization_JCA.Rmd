@@ -1,0 +1,99 @@
+---
+title: "Diffusion Analysis with SciPy"
+output: html_notebook
+---
+
+```{r, setup}
+library(reticulate)
+# py_install("pandas")
+# py_install("scipy")
+# py_install("matplotlib")
+```
+
+
+```{python}
+import pandas as pd
+import numpy as np
+from scipy.special import erfc
+from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
+```
+
+
+```{python}
+diff_prof=pd.read_csv("DiffusionProfilesV3.csv")
+linear_portion=pd.read_csv("XrangeDiffusionProfiles.csv")
+```
+
+```{python}
+def diff_value(x,m,c0):
+    return c0*erfc(m*x)
+```
+
+
+
+```{python}
+list_exp=[3,7,10,11,13,15,17,18,21]
+
+list_oxides=["SiO2","Al2O3","Na2O","K2O","CaO","TiO2"]
+```
+
+
+```{python}
+
+df = pd.DataFrame( columns = ['Expt', 'Oxide',"Slope",'c0'])
+for i in range(0,len(list_exp)):
+    print("SpDis"+str(list_exp[i]))
+    min_value=linear_portion[linear_portion["Expt."]==list_exp[i]]["Min x"].values
+    max_value=linear_portion[linear_portion["Expt."]==list_exp[i]]["Max x"].values
+
+    test_tio2=diff_prof[(diff_prof['Expt']=="SpDis"+str(list_exp[i])) & (diff_prof['x']<=float(max_value)) & (diff_prof['x']>=float(min_value))]
+    for j in range(0,len(list_oxides)):
+
+        xdata=np.asarray(test_tio2['x'])
+        ydata=np.asarray(test_tio2[list_oxides[j]])
+
+        p0 = 0,np.mean(ydata)
+
+        params,extras = curve_fit(diff_value,xdata,ydata,p0)
+        print(list_oxides[j],params[1])
+        df=df.append({'Expt':str(list_exp[i]), 'Oxide':list_oxides[j],"Slope":params[0],'c0':params[1]}, ignore_index=True)
+```
+
+```{python}
+# df
+```
+
+
+```{r}
+library(tidyverse)
+py$df
+Modelparams <- tibble(py$df)
+Modelparams
+```
+```{r}
+# Work on this chunk
+library(pracma)
+Profiles <- read_csv("DiffusionProfilesV3.csv")
+Expt <- unique(Profiles$Expt)
+Oxides <- c("SiO2", "Al2O3", "Na2O", "K2O", "FeO", "MgO", "CaO", "P2O5", "TiO2")
+for (i in Expt) {
+  ExptProfile <- filter(Profiles, Profiles$Expt == i)
+  for (j in Oxides) {
+    OxideProfile <- select(ExptProfile, x, j)
+    # C = C0erfc(x*m) 
+    C0 <- filter(Modelparams, Expt == j && Oxide == i)
+    OxideProfile$Fit <- Modelparams$C0*erfc()[]
+    p <- ggplot(OxideProfile, aes(x = x, y = OxideProfile[,2])) +
+    geom_point() +
+    geom_smooth() +
+    labs(title = str_c("Expt = ", i)) +
+    ylab(names(OxideProfile)[2]) +
+    theme_bw()
+  print(p)
+    }
+}
+
+
+```
+

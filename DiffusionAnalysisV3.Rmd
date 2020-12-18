@@ -1,0 +1,131 @@
+---
+title: "Diffusion Analysis with SciPy"
+output: html_notebook
+---
+
+In this RMD, the Diffusion Analysis will be done using python to optimize diffusion profile of different oxides based on experimental values. The optimization is done in python and then optimization values are loaded into R environment for further analysis.
+
+# Setup
+
+Reticulate library is used to run python in RMD. Reticulate installs miniconda which does not contain some common python libraries like "pandas", "scipy" and "matplotlib". They are installed manually later on.
+```{r, setup}
+library(reticulate)
+# py_install("pandas")
+# py_install("scipy")
+# py_install("matplotlib")
+```
+
+# Load Python Libraries
+
+Python libraries are loaded:
+
+```{python}
+import pandas as pd
+import numpy as np
+from scipy.special import erfc
+from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
+```
+
+# Loading Data
+
+2 types of data was loaded for the optimization. First is diffusion profile which contains the experimental values for different oxides. The second in linear portion which contains linear portion of the different oxides.
+
+
+```{python}
+diff_prof=pd.read_csv("DiffusionProfilesV3.csv")
+linear_portion=pd.read_csv("XrangeDiffusionProfiles.csv")
+```
+
+
+# Optimization Equation:
+
+The equation that need to be optimized is c=c0*erfc(m*x)
+Where c and x are found from the data. c0 and m needs to be optimized.
+
+
+```{python}
+def diff_value(x,m,c0):
+    return c0*erfc(m*x)
+```
+
+# Defining Lists of Experiments and Oxides
+
+For iteration, experiments and oxides need to be listed which is given below.
+
+
+```{python}
+list_exp=[3,7,10,11,13,15,17,18,21]
+
+list_oxides=["SiO2","Al2O3","Na2O","K2O","CaO","TiO2"]
+```
+
+
+# Automation of Optimization
+
+
+
+```{python}
+
+df = pd.DataFrame( columns = ['Expt', 'Oxide',"Slope",'c0'])# Define the output dataframe
+
+#Loops
+for i in range(0,len(list_exp)):
+    print("SpDis"+str(list_exp[i]))
+    # Get max and min value of x to subset the linear for the experiment
+    min_value=linear_portion[linear_portion["Expt."]==list_exp[i]]["Min x"].values
+    max_value=linear_portion[linear_portion["Expt."]==list_exp[i]]["Max x"].values
+    # Subset Experiment and linear portion for those epxeriments
+    test_tio2=diff_prof[(diff_prof['Expt']=="SpDis"+str(list_exp[i])) & (diff_prof['x']<=float(max_value)) & (diff_prof['x']>=float(min_value))]
+    for j in range(0,len(list_oxides)):
+
+        xdata=np.asarray(test_tio2['x'])# get x
+        ydata=np.asarray(test_tio2[list_oxides[j]])#get c
+
+        p0 = 0,np.mean(ydata)# define initial points of m and c0 for iteration
+
+        params,extras = curve_fit(diff_value,xdata,ydata,p0) #fit the function
+        print(list_oxides[j],params[1])# Print parameters
+        df=df.append({'Expt':str(list_exp[i]), 'Oxide':list_oxides[j],"Slope":params[0],'c0':params[1]}, ignore_index=True)#append the values to the final dataframe
+```
+
+```{python}
+df.to_csv("optimized_values.csv")
+```
+
+
+# Load the Dataframe into R
+
+
+```{r}
+library(tidyverse)
+py$df
+Modelparams <- tibble(py$df)
+Modelparams
+
+```
+
+```{r}
+# Work on this chunk
+library(pracma)
+Profiles <- read_csv("DiffusionProfilesV3.csv")
+Expt <- unique(Profiles$Expt)
+Oxides <- c("SiO2", "Al2O3", "Na2O", "K2O", "FeO", "MgO", "CaO", "P2O5", "TiO2")
+for (i in Expt) {
+  ExptProfile <- filter(Profiles, Profiles$Expt == i)
+  for (j in Oxides) {
+    OxideProfile <- select(ExptProfile, x, j)
+    # C = C0erfc(x*m) 
+    C0 <- filter(Modelparams, Expt == j && Oxide == i)
+    OxideProfile$Fit <- Modelparams$C0*erfc()[]
+    p <- ggplot(OxideProfile, aes(x = x, y = OxideProfile[,2])) +
+    geom_point() +
+    geom_smooth() +
+    labs(title = str_c("Expt = ", i)) +
+    ylab(names(OxideProfile)[2]) +
+    theme_bw()
+  print(p)
+    }
+}
+```
+
