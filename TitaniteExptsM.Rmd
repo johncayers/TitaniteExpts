@@ -4,6 +4,8 @@ author: "John C. Ayers"
 output:
   html_document:
     df_print: paged
+    toc: yes
+bibliography: "C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/TitaniteReferences.bib"
 ---
 ```{r set-global, include=FALSE}
 # Suppress all error messages
@@ -16,16 +18,19 @@ library(tidyverse, warn.conflicts = FALSE)
 library(plotly)
 library(car)
 library(leaps)
+library(knitr)
 ```
 
-```{r import data}
-# Import normalized EDS glass analyses
+### Import normalized EDS glass analyses
+
+```{r}
 TitaniteExpts <- read_csv("TitaniteExptsV2.csv")
 ```
 
+### Convert oxides to cation concentrations
 
 ```{r}
-# Convert oxides to cation concentrations ---------------
+
 TitaniteCations <- TitaniteExpts %>%
   mutate(
     Si = SiO2 / 60.0848,
@@ -42,8 +47,10 @@ TitaniteCations <- TitaniteExpts %>%
   )
 ```
 
+### Calculate cation fractions
+
 ```{r}
-# Calculate cation fractions -------------------
+
 CationFractions <- select(TitaniteCations, Expt, Type, SM, TC, Pkb, H2O, TimeH, Titanite, Rutile, TiO2, Si:CationSum)
 f <- match("Si", names(CationFractions))
 l <- match("P", names(CationFractions))
@@ -52,9 +59,14 @@ for (i in f:l) {
 }
 ```
 
+### Calculate melt composition parameters
 
-```{r}
-# Calculate melt composition parameters -------------------
+Formula for calculating melt composition parameter M [@Ryerson1987]
+
+$$M = \frac{(Na + K + 2*Ca)}{(Si * Al)}$$
+
+```{r Calculate melt composition parameters}
+
 CationFractions <- CationFractions %>%
   mutate(
     M = (Na + K + 2 * Ca) / (Si * Al),
@@ -62,12 +74,22 @@ CationFractions <- CationFractions %>%
     TK = TC + 273.15,
     InvTK = 1 / TK,
     PInvTK = (Pkb * 1000 - 1) * InvTK
-  )
+      )
 ```
 
+### Glass Compositions
 
 ```{r}
-# Plot time series for titanite-saturated experiments ----------------
+# Insert table of glass compositions
+GlassComps <- select(TitaniteCations, Expt, TC:TimeH, SiO2:P2O5)
+knitr::kable(GlassComps, digits = 2)
+
+```
+
+### Time series plots for titanite-saturated experiments
+
+```{r}
+
 NoTitanite <- filter(CationFractions, Titanite == "N")
 CationFractionsTitanite <- filter(CationFractions, Titanite == "Y")
 CationFractionsTitanite$Isotherm <- factor(CationFractionsTitanite$TC)
@@ -79,63 +101,94 @@ for (i in seq_along(SMplot)) {
     labs(title = as.name(SMplot[i]))
   print(p)
 }
-# Time series a bit concerning, since many isotherms seem to have a negative slope, suggesting that titanite crystallization is kinetically inhibited.
+
 ```
 
+Time series a bit concerning, since many isotherms seem to have a negative slope, suggesting that titanite crystallization is kinetically inhibited.
+
+### Correlation matrix
+
 ```{r}
-# Correlation matrix -----------------
+
 CorrTest <- select(CationFractionsTitanite, TiO2, TimeH, Pkb, H2O, Ca, M:PInvTK)
 cor(CorrTest)
-# Glass TiO2 concentration is positively correlated with melt composition parameter M and TK and negatively correlated with time and InvTK.
+
 ```
 
+Glass TiO2 concentration is positively correlated with melt composition parameter M and TK and negatively correlated with time and InvTK.
+
+### Scatterplot matrices
+
 ```{r}
-# Scatterplot matrices ---------------------
+
 CationFractionsTitanite$Type <- factor(CationFractionsTitanite$Type)
 scatterplotMatrix(~ Ti + Ca + TimeH + InvTK + TK + M, data = CationFractionsTitanite, smooth = FALSE)
 ```
 
+### Best subsets regression
 
 ```{r}
-# Best subsets regression ------------------------
+
 leaps <- regsubsets(TiO2 ~ TC + Pkb + H2O + TimeH + M + FM + InvTK, data = CationFractionsTitanite, nbest = 2)
 plot(leaps, scale = "adjr2")
 # summary(leaps)
 ```
 
+### Preliminary regression fit
 
 ```{r}
-# Preliminary regression fit ----------------
+
 fit <- lm(TiO2 ~ M + InvTK + Pkb + TimeH, data = CationFractionsTitanite)
 summary(fit)
 ```
 
+### Refined regression model
+
+- Pkb and TimeH are not significant, so drop
+- Regression of dependent variable TiO2 (wt.%) as a function of independent variables M and invTK
+
 ```{r}
-# refined regression model --------------
-# Pkb and TimeH are not significant, so drop
-# Regression of dependent variable TiO2 (wt.%) as a function of independent variables M and invTK
+
 fit <- lm(TiO2 ~ M + InvTK, data = CationFractionsTitanite)
 summary(fit)
 plot(fit)
 ```
 
+### Final regression model
 
 ```{r}
-# Final regression model --------------------
 RegModel <- select(CationFractionsTitanite, Expt, Type, TiO2, InvTK, TK, M)
 DelExpts <- c("SpDis_1", "SpDis_2", "SpDis_4")
 RegModel <- filter(RegModel, !(Expt %in% DelExpts))
 fit <- lm(TiO2 ~ M + InvTK, data = RegModel)
 summary(fit)
 plot(fit)
-# I think this is our best model. Removing more experiments doesn't significantly improve fit.
+```
+
+I think this is our best model. Removing more experiments doesn't significantly improve fit.
+
+### Test of regression assumptions
+
+```{r}
+library(gvlma)
+gvmodel <- gvlma(fit)
+summary(gvmodel)
+```
+
+"Global stat" and "Link Function" assumptions not satisfied - see explanation in:
+Peña E. A. and Slate E. H. (2006) Global validation of linear model assumptions. J. Am. Stat. Assoc. 101, 341–354.
+
+```{r Influence plot and data output}
 influencePlot(fit, main = "Influence Plot", sub = "Circle size is proportional to Cook's distance")
-# Observations depicted as large circles may have a disproportionate influence on the parameter estimates of the model. Points with Hat values above 0.2 have high leverage.
 write.csv(RegModel, "ExptsInModel.csv")
 ```
 
+Observations depicted as large circles may have a disproportionate influence on the parameter estimates of the model. Points with Hat values above 0.2 have high leverage.
+
+### Model TiO2 concentrations and errors
+
 ```{r}
-# Calculate model TiO2 concentrations and errors ---------
+
 RegModel <- RegModel %>%
   mutate(
     TiO2saturation = (3.47 * M - 8868 * InvTK + 3.47),
@@ -145,8 +198,10 @@ RegModel <- RegModel %>%
   )
 ```
 
+### Plot model versus measured TiO2
+
 ```{r}
-# Plot model versus measured TiO2 -------------
+
 ggplot(RegModel, aes(x = TiO2, y = TiO2saturation, ymin = lower, ymax = upper, shape = Type, color = Type)) +
   geom_pointrange() +
   geom_abline(slope = 1, intercept = 0)
@@ -154,62 +209,64 @@ ggplot(RegModel, aes(x = TiO2, y = TiO2saturation, ymin = lower, ymax = upper, s
 ggplotly()
 ```
 
+### log-log plot
+
 ```{r}
-# log-log plot -------------
+
 ggplot(RegModel, aes(x = log(TiO2), y = log(TiO2saturation), ymin = log(lower), ymax = log(upper), shape = Type, color = Type)) +
   geom_pointrange() +
   geom_abline(slope = 1, intercept = 0)
 ```
 
+### TiO2 vs. M plot
 
 ```{r}
-# TiO2 vs. M plot ---------------
+
 ggplot(RegModel, aes(x = M, y = TiO2, shape = Type, color = Type)) +
   geom_point()
 ```
 
+### TiO2-InvTK plot
+
 ```{r}
-# TiO2-InvTK plot -------------------------
 ggplot(RegModel, aes(x = InvTK, y = TiO2, color = Type)) +
   geom_point()
 ```
 
+### TiO2-TK plot
+
 ```{r}
-# TiO2-TK plot -------------------------
+
 ggplot(RegModel, aes(x = TK, y = TiO2, color = Type)) +
   geom_point()
 ```
 
+### Model output table
 
 ```{r}
-# Model output table -------------
+
 TiO2ModelTable <- select(RegModel, Expt, M, InvTK, TiO2, TiO2saturation, TiO2saturationSD)
+knitr::kable(TiO2ModelTable)
 write.csv(TiO2ModelTable, file = "TiO2ModelTable.csv")
 ```
 
+### Undersaturation test
+
+Use Model equation to test whether Expts in "NoTitanite" are undersaturated
+
 ```{r}
-# Undersaturation test -------------------
-# Use Model equation to test whether Expts in "NoTitanite" are undersaturated
-NoTitaniteModel <- filter(NoTitanite, Rutile == "N") %>%
-  mutate(
-    TiO2saturation = (3.47 * M - 8868 * InvTK + 3.47),
-    TiO2saturationSD = TiO2saturation * sqrt((0.22 / 3.47)^2 + (1575 / 8868)^2),
-    lower = TiO2saturation - TiO2saturationSD,
-    upper = TiO2saturation + TiO2saturationSD
-  )
+NoTitaniteModel <- filter(NoTitanite, Rutile == "N")
+NoTitaniteModel <- select(NoTitaniteModel, Expt, Type, TiO2, InvTK, TK, M)
+NoTitaniteModel$TiO2saturation <- predict(fit, NoTitaniteModel)
 CompareTiO2 <- select(NoTitaniteModel, Expt, TiO2, TiO2saturation)
 CompareTiO2
-# NoTitaniteModel <- NoTitaniteModel%>%
-#   add_column(Agree = "?")
-# # Don't know why "N" is assigned but not "Y" in following loop
-# for (i in 1:nrow(NoTitaniteModel)) {
-#   if (NoTitaniteModel$TiO2saturation[i] > NoTitaniteModel$TiO2[i]) {
-#     NoTitanite$Agree[i] <- c("Y")
-#   }
-#   else {
-#     NoTitaniteModel$Agree[i] <- c("N")
-#   }
-# }
+```
+
+### Save output file and display session info
+
+```{r}
 save.image("C:/Users/ayersj/OneDrive - Vanderbilt/Classes/EES4600/Homeworks/2020/HW2/TitaniteExptsM.RData")
 sessionInfo()
 ```
+
+# References

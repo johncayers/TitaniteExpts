@@ -1,6 +1,11 @@
 ---
 title: "Diffusion Analysis with SciPy"
-output: html_notebook
+author: "John C. Ayers and Ken Rahman"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+bibliography: "C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/TitaniteReferences.bib"
 ---
 
 In this RMD, the Diffusion Analysis will be done using python to optimize diffusion profile of different oxides based on experimental values. The optimization is done in python and then optimization values are loaded into R environment for further analysis.
