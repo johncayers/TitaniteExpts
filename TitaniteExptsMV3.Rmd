@@ -16,13 +16,14 @@ knitr::opts_chunk$set(error = FALSE)
 ```{r setup, echo=FALSE, include=FALSE}
 if (!require("pacman"))
    install.packages("pacman")
-pacman::p_load(tidyverse, plotly, car, leaps, knitr, skimr)
+pacman::p_load(tidyverse, car, leaps, knitr, skimr, ggExtra)
+
 ```
 
 ### Import normalized EDS glass analyses
 
 ```{r}
-TitaniteExpts <- read_csv("TitaniteExptsV2.csv")
+TitaniteExpts <- read_csv("TitaniteExptsV3.csv")
 skimr::skim(TitaniteExpts)
 
 ```
@@ -115,8 +116,6 @@ cor(CorrTest)
 
 ```
 
-Glass TiO2 concentration is positively correlated with melt composition parameter M and TK and negatively correlated with time and InvTK.
-
 ### Scatterplot matrices
 
 ```{r}
@@ -125,14 +124,18 @@ CationFractionsTitanite$Type <- factor(CationFractionsTitanite$Type)
 scatterplotMatrix(~ Ti + Ca + TimeH + InvTK + TK + M, data = CationFractionsTitanite, smooth = FALSE)
 ```
 
+Glass TiO2 concentration is positively correlated with melt composition parameter M and TK and negatively correlated with time and InvTK.
+
 ### Best subsets regression
 
 ```{r}
 
-leaps <- regsubsets(TiO2 ~ TC + Pkb + H2O + TimeH + M + FM + InvTK, data = CationFractionsTitanite, nbest = 2)
+leaps <- regsubsets(TiO2 ~ TK + Pkb + H2O + TimeH + M + FM + InvTK, data = CationFractionsTitanite, nbest = 2)
 plot(leaps, scale = "adjr2")
 # summary(leaps)
 ```
+
+Since TK and InvTK convey the same information, and theory suggests that titanite solubility should depend on inverse temperature, we include only InvTK in the analysis. Results of subsets regression suggest that M, InvTK, Pkb, and TimeH are the significant independent variables.
 
 ### Preliminary regression fit
 
@@ -190,22 +193,28 @@ Observations depicted as large circles may have a disproportionate influence on 
 
 RegModel <- RegModel %>%
   mutate(
-    TiO2saturation = (out$coefficients[2,1] * M + out$coefficients[3,1] * InvTK + out$coefficients[1,1]),
-    TiO2saturationSD = TiO2saturation * sqrt((out$coefficients[2,2]/ out$coefficients[2,1])^2 + (out$coefficients[3,2] / out$coefficients[3,1])^2),
-    lower = TiO2saturation - TiO2saturationSD,
-    upper = TiO2saturation + TiO2saturationSD
+    TiO2sat = (out$coefficients[2,1] * M + out$coefficients[3,1] * InvTK + out$coefficients[1,1]),
+    TiO2satSD = TiO2sat * sqrt((out$coefficients[2,2]/ out$coefficients[2,1])^2 + (out$coefficients[3,2] / out$coefficients[3,1])^2),
+    lower = TiO2sat - TiO2satSD,
+    upper = TiO2sat + TiO2satSD
   )
+
 ```
 
 ### Plot model versus measured TiO2
 
 ```{r}
-
-ggplot(RegModel, aes(x = TiO2, y = TiO2saturation, ymin = lower, ymax = upper, shape = Type, color = Type)) +
+fitparams <- c(out$coefficients[1,1], out$coefficients[2,1],  out$coefficients[3,1])
+fitparams <- round(fitparams, digits = 2)
+p <- ggplot(RegModel, aes(x = TiO2, y = TiO2sat, ymin = lower, ymax = upper, shape = Type, color = Type)) +
   geom_pointrange() +
-  geom_abline(slope = 1, intercept = 0)
-# Convert it to an interactive plot
-ggplotly()
+  geom_abline(slope = 1, intercept = 0) +
+  labs(caption = str_c("TiO2", " = ",fitparams[2], "* M ", fitparams[3], "* 1/T(K) + ",fitparams[1])) +
+  theme(legend.position = "left")
+# add marginal distributions
+p1 <- ggMarginal(p, type = "histogram")
+print(p1)
+
 ```
 
 ### log-log plot
@@ -214,15 +223,19 @@ ggplotly()
 RegModel <- RegModel %>%
   mutate(
     logTiO2 = log10(TiO2),
-    logTiO2sat = log10(TiO2saturation)
+    logTiO2sat = log10(TiO2sat)
   )
-ggplot(RegModel, aes(x = logTiO2, y = logTiO2sat, ymin = log10(lower), ymax = log10(upper), shape = Type, color = Type)) +
+p <- ggplot(RegModel, aes(x = logTiO2, y = logTiO2sat, ymin = log10(lower), ymax = log10(upper), shape = Type, color = Type)) +
   geom_pointrange() +
  # geom_text(label = RegModel$Expt, nudge_x = 0.25, nudge_y = 0.25) +
   geom_abline(slope = 1, intercept = 0) +
   xlim(-1,1.5) +
-  ylim(-1,1.5)
-ggplotly()
+  ylim(-1,1.5) +
+  theme(legend.position = "left") +
+  ylab(~paste("log"[10], "TiO"[2][,sat])) +
+  xlab(~paste("log"[10], "TiO"[2][,meas]))
+p1 <- ggMarginal(p, type = "histogram")
+print(p1)
 
 ```
 
@@ -252,9 +265,17 @@ ggplot(RegModel, aes(x = TK, y = TiO2, color = Type)) +
 ### Model output table
 
 ```{r}
-
-TiO2ModelTable <- select(RegModel, Expt, M, InvTK, TiO2, TiO2saturation, TiO2saturationSD)
-knitr::kable(TiO2ModelTable)
+TiO2ModelTable <- RegModel %>%
+  transmute(
+    Expt,
+    M = round(M, digits = 2),
+    InvTK = round(1000*InvTK, digits = 3),
+    TiO2,
+    TiO2sat = round(TiO2sat, digits = 2),
+    TiO2satSD = round(TiO2satSD, digits = 2)
+  )
+kable(TiO2ModelTable, format = "html",
+             col.names = c("Expt.", "M", "1000*1/T(K)", "TiO~2~", "TiO~2,sat~", "1$\\sigma$"))
 write.csv(TiO2ModelTable, file = "TiO2ModelTable.csv")
 ```
 
@@ -265,15 +286,22 @@ Use Model equation to test whether Expts in "NoTitanite" are undersaturated
 ```{r}
 NoTitaniteModel <- filter(NoTitanite, Rutile == "N")
 NoTitaniteModel <- select(NoTitaniteModel, Expt, Type, TiO2, InvTK, TK, M)
-NoTitaniteModel$TiO2saturation <- predict(fit, NoTitaniteModel)
-CompareTiO2 <- select(NoTitaniteModel, Expt, TiO2, TiO2saturation)
+NoTitaniteModel$TiO2sat <- predict(fit, NoTitaniteModel)
+CompareTiO2 <- select(NoTitaniteModel, Expt, TiO2, TiO2sat)
+CompareTiO2 <- CompareTiO2 %>%
+  mutate(
+    Model_Correct = if_else(TiO2sat > TiO2, "true", "false")
+  )
 CompareTiO2
+CompareTiO2 %>%
+  count(Model_Correct)
+
 ```
 
 ### Save output file and display session info
 
 ```{r}
-save.image("C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/DataAnalysis/TitaniteExpts/TitaniteExptsM.RData")
+save.image("TitaniteExptsM.RData")
 sessionInfo()
 ```
 
