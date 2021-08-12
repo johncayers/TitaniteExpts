@@ -1,11 +1,11 @@
 ---
-title: 'Titanite solubility experiments: Analysis of EDS data'
+title: 'Analysis of Titanite solubility experiments'
 author: "John C. Ayers"
 output:
   html_document:
     df_print: paged
     toc: yes
-bibliography: "C:/Users/ayersj/OneDrive - Vanderbilt/Papers/SpheneSolubility/TitaniteReferences.bib"
+bibliography: "TitaniteReferences.bib"
 ---
 ```{r set-global, include=FALSE}
 # Suppress all error messages
@@ -32,7 +32,7 @@ skimr::skim(TitaniteExpts)
 
 ```{r}
 
-TitaniteCations <- TitaniteExpts %>%
+GlassCations <- TitaniteExpts %>%
   mutate(
     Si = SiO2 / 60.0848,
     Al = 2 * Al2O3 / 101.961,
@@ -52,7 +52,7 @@ TitaniteCations <- TitaniteExpts %>%
 
 ```{r}
 
-CationFractions <- select(TitaniteCations, Expt, Type, SM, TC, Pkb, H2O, TimeH, Titanite, Rutile, TiO2, Si:CationSum)
+CationFractions <- select(GlassCations, Expt, Type, SM, TC, Pkb, H2O, TimeH, Titanite, Rutile, TiO2, Si:CationSum)
 f <- match("Si", names(CationFractions))
 l <- match("P", names(CationFractions))
 for (i in f:l) {
@@ -82,7 +82,7 @@ CationFractions <- CationFractions %>%
 
 ```{r}
 # Insert table of glass compositions
-GlassComps <- select(TitaniteCations, Expt, TC:TimeH, SiO2:P2O5)
+GlassComps <- select(GlassCations, Expt, TC:TimeH, SiO2:P2O5)
 knitr::kable(GlassComps, digits = 2)
 
 ```
