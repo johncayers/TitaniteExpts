@@ -67,7 +67,7 @@ Formula for calculating melt composition parameter M [@Ryerson1987]
 
 $$M = \frac{(Na + K + 2*Ca)}{(Si * Al)}$$
 
-```{r}
+```{r Calculate melt composition parameters}
 
 CationFractions <- CationFractions %>%
   mutate(
@@ -121,11 +121,12 @@ cor(CorrTest)
 ### Scatterplot matrices
 
 ```{r}
+
 CationFractionsTitanite$Type <- factor(CationFractionsTitanite$Type)
-scatterplotMatrix(~ Ti + Ca + TimeH + TK + InvTK + M + C, data = CationFractionsTitanite, smooth = FALSE)
+scatterplotMatrix(~ Ti + Ca + TimeH + TK + M +C, data = CationFractionsTitanite, smooth = FALSE)
 ```
 
-Glass TiO2 concentration is positively correlated with TK and melt composition parameters M and C and negatively correlated with time and InvTK.
+Glass TiO2 concentration is positively correlated with melt composition parameter M and TK and negatively correlated with time and InvTK.
 
 ### Best subsets regression
 
@@ -136,9 +137,9 @@ plot(leaps, scale = "adjr2")
 # summary(leaps)
 ```
 
-Since TK and InvTK convey the same information, and theory suggests that titanite solubility should depend on inverse temperature, and TK has a higher correlation coefficient, we include only TK in the analysis. Results of subsets regression suggest that M or C, TK, Pkb, and TimeH are the significant independent variables. First run M models, then C models.
+Since TK and InvTK convey the same information, and theory suggests that titanite solubility should depend on inverse temperature, and TK has a higher correlation coefficient, we include only TK in the analysis. Results of subsets regression suggest that M, TK, Pkb, and TimeH are the significant independent variables.
 
-### Preliminary regression fit M
+### Preliminary regression fit
 
 ```{r}
 
@@ -146,7 +147,7 @@ fit <- lm(TiO2 ~ M + TK + Pkb + TimeH, data = CationFractionsTitanite)
 summary(fit)
 ```
 
-### Refined regression model M
+### Refined regression model
 
 - Pkb and TimeH are not significant, so drop
 - Regression of dependent variable TiO2 (wt.%) as a function of independent variables M and TK
@@ -158,7 +159,7 @@ summary(fit)
 plot(fit)
 ```
 
-### Final regression model M
+### Final regression model
 
 ```{r}
 RegModel <- select(CationFractionsTitanite, Expt, Type, TiO2, TK, M)
@@ -172,7 +173,7 @@ plot(fit)
 
 I think this is our best model. Removing more experiments doesn't significantly improve fit.
 
-### Test of M regression assumptions
+### Test of regression assumptions
 
 ```{r}
 library(gvlma)
@@ -180,16 +181,14 @@ gvmodel <- gvlma(fit)
 summary(gvmodel)
 ```
 
-### Influence plot M model and data output
-
-```{r}
+```{r Influence plot and data output}
 influencePlot(fit, main = "Influence Plot", sub = "Circle size is proportional to Cook's distance")
-write.csv(RegModel, "ExptsInModelM.csv")
+write.csv(RegModel, "ExptsInModelV4.csv")
 ```
 
 Observations depicted as large circles may have a disproportionate influence on the parameter estimates of the model. Points with Hat values above 0.2 have high leverage.
 
-### M Model TiO2 concentrations and errors
+### Model TiO2 concentrations and errors
 
 ```{r}
 
@@ -203,7 +202,7 @@ RegModel <- RegModel %>%
 
 ```
 
-### Plot M model versus measured TiO2
+### Plot model versus measured TiO2
 
 ```{r}
 fitparams <- c(out$coefficients[1,1], out$coefficients[2,1],  out$coefficients[3,1])
@@ -211,7 +210,7 @@ fitparams <- round(fitparams, digits = 2)
 p <- ggplot(RegModel, aes(x = TiO2, y = TiO2sat, ymin = lower, ymax = upper, shape = Type, color = Type)) +
   geom_pointrange() +
   geom_abline(slope = 1, intercept = 0) +
-  labs(caption = str_c("TiO2", " = ",fitparams[2], "* M ", fitparams[3], "* T(K) + ",fitparams[1])) +
+  labs(caption = str_c("TiO2", " = ",fitparams[2], "* M ", fitparams[3], "* 1/T(K) + ",fitparams[1])) +
   theme(legend.position = "left")
 # add marginal distributions
 p1 <- ggMarginal(p, type = "histogram")
@@ -219,7 +218,7 @@ print(p1)
 
 ```
 
-### M log-log plot
+### log-log plot
 
 ```{r}
 RegModel <- RegModel %>%
@@ -248,6 +247,14 @@ print(p1)
 ggplot(RegModel, aes(x = M, y = TiO2, shape = Type, color = Type)) +
   geom_point()
 ```
+
+### TiO2-TK plot
+
+```{r}
+ggplot(RegModel, aes(x = TK, y = TiO2, color = Type)) +
+  geom_point()
+```
+
 ### TiO2-TK plot
 
 ```{r}
@@ -256,7 +263,7 @@ ggplot(RegModel, aes(x = TK, y = TiO2, color = Type)) +
   geom_point()
 ```
 
-### M Model output table
+### Model output table
 
 ```{r}
 TiO2ModelTable <- select(RegModel, Expt, M, TK, TiO2, TiO2sat,TiO2satSD)
@@ -265,7 +272,7 @@ kable(TiO2ModelTable, digits = 2, format = "html",
 write.csv(TiO2ModelTable, file = "TiO2ModelTable.csv")
 ```
 
-### M undersaturation test
+### Undersaturation test
 
 Use Model equation to test whether Expts in "NoTitanite" are undersaturated
 
@@ -284,150 +291,10 @@ CompareTiO2 %>%
 
 ```
 
-### Preliminary regression fit C
-
-```{r}
-
-fit <- lm(TiO2 ~ C + TK + Pkb + TimeH, data = CationFractionsTitanite)
-summary(fit)
-```
-
-### Refined regression model C
-
-- TimeH not significant, so drop
-- Regression of dependent variable TiO2 (wt.%) as a function of independent variables C, Pkb and TK
-
-```{r}
-
-fit <- lm(TiO2 ~ C + Pkb + TK, data = CationFractionsTitanite)
-summary(fit)
-plot(fit)
-```
-
-### Final regression model C
-
-```{r}
-RegModel <- select(CationFractionsTitanite, Expt, Type, TiO2, TK, Pkb, C)
-DelExpts <- c("SpDis_1", "SpDis_15", "SpDis_4")
-RegModel <- filter(RegModel, !(Expt %in% DelExpts))
-# Fitting this dataset results in Pkb not being significant, so drop
-fit <- lm(TiO2 ~ C + TK, data = RegModel)
-out <- summary(fit)
-out
-plot(fit)
-```
-
-I think this is our best model. Removing more experiments doesn't significantly improve fit.
-
-### Test of C regression assumptions
-
-```{r}
-library(gvlma)
-gvmodel <- gvlma(fit)
-summary(gvmodel)
-```
-
-### C model influence plot and data output
-
-```{r}
-influencePlot(fit, main = "Influence Plot", sub = "Circle size is proportional to Cook's distance")
-write.csv(RegModel, "ExptsInModelC.csv")
-```
-
-Observations depicted as large circles may have a disproportionate influence on the parameter estimates of the model. Points with Hat values above 0.2 have high leverage.
-
-### C Model TiO2 concentrations and errors
-
-```{r}
-
-RegModel <- RegModel %>%
-  mutate(
-    TiO2sat = (out$coefficients[2,1] * C + out$coefficients[3,1] * TK + out$coefficients[1,1]),
-    TiO2satSD = TiO2sat * sqrt((out$coefficients[2,2]/ out$coefficients[2,1])^2 + (out$coefficients[3,2] / out$coefficients[3,1])^2),
-    lower = TiO2sat - TiO2satSD,
-    upper = TiO2sat + TiO2satSD
-  )
-
-```
-
-### Plot C model versus measured TiO2
-
-```{r}
-fitparams <- c(out$coefficients[1,1], out$coefficients[2,1],  out$coefficients[3,1])
-fitparams <- round(fitparams, digits = 3)
-p <- ggplot(RegModel, aes(x = TiO2, y = TiO2sat, ymin = lower, ymax = upper, shape = Type, color = Type)) +
-  geom_pointrange() +
-  geom_abline(slope = 1, intercept = 0) +
-  labs(caption = str_c("TiO2", " = ",fitparams[2], "* C + ", fitparams[3], "* T(K) ",fitparams[1])) +
-  theme(legend.position = "left")
-# add marginal distributions
-p1 <- ggMarginal(p, type = "histogram")
-print(p1)
-
-```
-
-### C log-log plot
-
-```{r}
-RegModel <- RegModel %>%
-  mutate(
-    logTiO2 = log10(TiO2),
-    logTiO2sat = log10(TiO2sat)
-  )
-p <- ggplot(RegModel, aes(x = logTiO2, y = logTiO2sat, ymin = log10(lower), ymax = log10(upper), shape = Type, color = Type)) +
-  geom_pointrange() +
- # geom_text(label = RegModel$Expt, nudge_x = 0.25, nudge_y = 0.25) +
-  geom_abline(slope = 1, intercept = 0) +
-  xlim(-1,1.5) +
-  ylim(-1,1.5) +
-  theme(legend.position = "left") +
-  ylab(~paste("log"[10], "TiO"[2][,sat])) +
-  xlab(~paste("log"[10], "TiO"[2][,meas]))
-p1 <- ggMarginal(p, type = "histogram")
-print(p1)
-
-```
-
-### TiO2 vs. C plot
-
-```{r}
-
-ggplot(RegModel, aes(x = C, y = TiO2, shape = Type, color = Type)) +
-  geom_point()
-```
-
-### C Model output table
-
-```{r}
-TiO2ModelTable <- select(RegModel, Expt, C, TK, TiO2, TiO2sat,TiO2satSD)
-kable(TiO2ModelTable, digits = 2, format = "html",
-             col.names = c("Expt.", "C", "T(K)", "TiO~2~", "TiO~2,sat~", "1$\\sigma$"))
-write.csv(TiO2ModelTable, file = "TiO2ModelC_Table.csv")
-```
-
-### C undersaturation test
-
-Use Model equation to test whether Expts in "NoTitanite" are undersaturated
-
-```{r}
-NoTitaniteModel <- filter(NoTitanite, Rutile == "N")
-NoTitaniteModel <- select(NoTitaniteModel, Expt, Type, TiO2, TK, C)
-NoTitaniteModel$TiO2sat <- predict(fit, NoTitaniteModel)
-CompareTiO2 <- select(NoTitaniteModel, Expt, TiO2, TiO2sat)
-CompareTiO2 <- CompareTiO2 %>%
-  mutate(
-    Model_Correct = if_else(TiO2sat > TiO2, "true", "false")
-  )
-CompareTiO2
-CompareTiO2 %>%
-  count(Model_Correct)
-
-```
-
 ### Save output file and display session info
 
 ```{r}
-save.image("TitaniteExpts.RData")
+save.image("TitaniteExptsM.RData")
 sessionInfo()
 ```
 

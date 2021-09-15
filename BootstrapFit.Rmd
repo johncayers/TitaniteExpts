@@ -1,0 +1,138 @@
+---
+title: 'Titanite solubility: Flanagan + LEPR experiments'
+author: "John C. Ayers"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+bibliography: "TitaniteReferences.bib"
+---
+
+```{r set-global, include=FALSE, echo=FALSE}
+# Suppress all error messages
+knitr::opts_chunk$set(error = FALSE)
+```
+
+```{r setup, include=FALSE}
+if (!require("pacman"))
+   install.packages("pacman")
+pacman::p_load(tidyverse, skimr, boot)
+
+```
+
+### Input data
+
+```{r}
+AllExpts <- read_csv("AllExptsV3.csv")
+# Contains 32 of 39 DF experiments
+skimr::skim(AllExpts)
+```
+
+### Calculate concentrations of cations
+
+```{r, echo=FALSE}
+Cations <- AllExpts %>%
+  mutate(
+    Si = SiO2/60.0848,
+    Al = 2*Al2O3/101.961,
+    Na = 2*Na2O/61.979,
+    K = 2*K2O/94.194,
+    Ca = CaO/56.0794,
+    Fe = FeO/71.8464,
+    Mg = MgO/40.3044,
+    Ti = TiO2/79.8988,
+    eCa = (CaO/56.0794 - Al2O3/101.961 + K2O/94.194 + Na2O/61.979),
+    CationSum = (Si + Al + Na + K + Ca + Fe + Mg + Ti)
+     )
+```
+
+### Calculate cation fractions
+
+```{r, echo=FALSE}
+
+CationFractions <- Cations
+f <- match("Si", names(CationFractions))
+l <- match("Ti", names(CationFractions))
+for (i in f:l) {
+  CationFractions[(i)] = CationFractions[(i)]/CationFractions$CationSum
+}
+
+```
+
+### Calculate melt composition parameters
+
+Formula for calculating melt composition parameter M [@Ryerson1987]
+
+$$M = \frac{(Na + K + 2*Ca)}{(Si * Al)}$$
+Formula for calculating melt composition parameter C:
+
+$$C = \frac{10*eCa}{Si * Al}$$ 
+
+where symbols are cation fractions, and excess calcium is defined as
+
+$$ eCa = \frac{(CaO - Al_{2}O_{3} + Na_{2}O + K_{2}O)}{Σ cations}$$
+
+```{r, echo=FALSE}
+CationFractions <- CationFractions %>%
+  mutate(
+    M = (Na + K + 2*Ca)/(Si*Al),
+    FM = (Na + K + 2*(Ca + Fe + Mg))/(Si*Al),
+    C = (10*eCa)/(Si*Al),
+    TK = TC+273.15,
+    InvTK = 1/TK,
+    PInvTK = (Pkb*1000 - 1)*InvTK,
+    lnTiO2 = log(TiO2)
+    )
+# Filter out experiments with no titanite in run products
+CationFractionsNoTitanite <- filter(CationFractions, Titanite == "N")
+CationFractionsTitanite <- filter(CationFractions, Titanite == "Y")
+```
+
+The methods below are described in section 12.6.2 of [Kabacoff2015]
+
+### Preliminary M model fit
+
+```{r, echo=FALSE}
+RegModel <- CationFractionsTitanite
+bs <- function(formula, data, indices) {
+  d <- data[indices,]
+  fit <- lm(formula, data = d)
+  return(coef(fit))
+}
+set.seed(4329)
+results <- boot(data = RegModel, statistic = bs, R=1000, formula = lnTiO2 ~ M + InvTK)
+print(results)
+```
+
+```{r}
+rsq <- function(formula, data, indices) {
+  d <- data[indices,]
+  fit <- lm(formula, data = d)
+  return(summary(fit)$r.square)
+}
+set.seed(4329)
+results <- boot(data = RegModel, statistic = rsq, R=1000, formula = lnTiO2 ~ M + InvTK)
+print(results) # Mean is only 0.79, about the same as in my preliminary fit using simple lm. 
+plot(results) # plots distribution of r-squared values. 
+```
+
+### Calculate M model TiO2 concentrations and errors
+
+```{r, echo=FALSE}
+# Neither of the following work and I can't figure out why; just get "NA" values
+RegModel$lnTiO2sat = results$t0[1] + results$t0[2]*RegModel$M  +results$t0[3]*RegModel$InvTK
+RegModel <- RegModel %>%
+  mutate(
+   lnTiO2sat = results$t0[1] + results$t0[2]*M  +results$t0[3]*InvTK
+      )
+```
+
+```{r}
+ggplot(RegModel, aes(x=lnTiO2, y=lnTiO2sat, shape = Source, color = Source)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0) +
+  theme(legend.position = "left") +
+  ylab(~paste("TiO"[2],"sat")) +
+  xlab(~paste("TiO"[2],"meas"))
+```
+

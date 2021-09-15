@@ -22,9 +22,9 @@ fit <- lm(TiO2ThisStudy ~ TiO2MELTS, data = MELTS)
 summary(fit)
 
 # Have to add MELTS results for SpG30
-ggplot(MELTS, aes(x=ThisStudy, y = MELTS)) +
+ggplot(MELTS, aes(x=TiO2ThisStudy, y = TiO2MELTS)) +
   geom_point()
 
-
+write.csv(MELTS, file = "TiO2MELTSvsThisStudy.csv")
 ```
 

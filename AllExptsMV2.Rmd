@@ -217,15 +217,18 @@ RegModel <- RegModel %>%
 
 ```{r}
 fitparams <- c(out$coefficients[1,1], out$coefficients[2,1],  out$coefficients[3,1])
-fitparams <- round(fitparams, digits = 3)
+fitparams <- round(fitparams, digits = 4)
 p <- ggplot(RegModel, aes(x = TiO2, y = TiO2sat, ymin = lower, ymax = upper, shape = Source, color = Source)) +
   geom_pointrange() +
   geom_abline(slope = 1, intercept = 0) +
-  labs(caption = str_c("TiO2", " = ",fitparams[2], "* M + ", fitparams[3], "* T(K) + ",fitparams[1])) +
-  theme(legend.position = "left")
+  # labs(caption = str_c("TiO2sat = ",fitparams[2], "* M + ", fitparams[3], "* T(K) + ",fitparams[1])) +
+  theme(legend.position = "left") +
+  ylab(~paste("TiO"[2],"sat")) +
+  xlab(~paste("TiO"[2],"meas"))
 # add marginal distributions
 p1 <- ggMarginal(p, type = "histogram")
 print(p1)
+ggsave("AllExptsMV2ModelFit.svg", width = 2000, height = 2*618, units = "px", plot = p1)
 
 ```
 

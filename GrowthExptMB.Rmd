@@ -1,0 +1,67 @@
+---
+title: "Mass balance of titanite growth experiments"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r set-global, include=FALSE}
+# Suppress all error messages
+knitr::opts_chunk$set(error = FALSE)
+```
+
+```{r setup, echo=FALSE, include=FALSE}
+if (!require("pacman"))
+   install.packages("pacman")
+pacman::p_load(tidyverse, knitr, nnls)
+MB <- read_csv("GrowthExptMB_V4.csv")
+```
+
+
+```{r}
+SM <- filter(MB, Expt == "SM")
+Expts <- filter(MB, Expt != "SM")
+ExptList <- unique(Expts$Expt)
+for (i in seq_along(ExptList)) {
+  tmp <- filter(Expts, Expt == ExptList[i])
+  tmpSM_ID <- unique(tmp$SM)
+  tmpSM = filter(SM, SM == tmpSM_ID)
+  tmpall <- bind_rows(tmp, tmpSM) %>%
+    select(PhaseID, Oxide, Conc)
+  tmpPhaseID <- unique(tmpall$PhaseID)
+  tmpallwide <- tmpall %>%
+    pivot_wider(names_from = PhaseID,  values_from = Conc) %>%
+    filter(Oxide != "FeO") # Need to remove FeO due to iron loss.
+  # Following lines for normalization, but for mass balance best to not normalize.
+    # for (j in tmpPhaseID) {
+  #   tmpallwide[(j)] = 100*tmpallwide[(j)]/sum(tmpallwide[(j)])
+  # }
+  write.csv(tmpallwide, file = str_c("MB", (ExptList[i]), ".csv"))
+ # Fit linear model with zero intercept
+  fit <- lm(SM ~ 0 + Gl + Tit, data = tmpallwide)
+  out <- summary(fit)
+  cat("\n", ExptList[[i]])
+  print(out)
+  fitparams <- c(out$coefficients[1,1], out$coefficients[2,1])
+   if(out$coefficients[2,1] < 0) {
+    cat("Negative coefficients, use non-negative least squares in the nnls package \n")
+    phases <- select(tmpallwide, Gl, Tit)
+    phases <- as.matrix(phases)
+    ExptSM <- select(tmpallwide, SM)
+    ExptSM <- unlist(ExptSM)
+    fit <- coef(nnls(phases, ExptSM))
+    cat("Coefficients \n", fit)
+    fitparams <- c(fit[1], fit[2])
+   }
+  tmpallwide$model <- (tmpallwide$Gl*fitparams[1] + tmpallwide$Tit*fitparams[2])
+  tmpallwide$PerDiff <- 100*(tmpallwide$model - tmpallwide$SM)/tmpallwide$SM
+  # the value at the bottom of the PerDiff column is the mean of the absolute value of the percent difference. 
+  tmpallwide[nrow(tmpallwide)+1,]=c("sum", sum(tmpallwide[,2]), sum(tmpallwide[,3]), sum(tmpallwide[,4]), sum(tmpallwide[,5]), sum(abs(tmpallwide[,6]))/count(tmpallwide[,6]))
+  tmpallwidetable <- kable(tmpallwide, digits = 2, caption = ExptList[[i]])
+print(tmpallwidetable)
+}
+```
+
+
+Problem: Get a negative coefficient for titanite in SpG_6, SpG_10, SpG_12, SpG_17, and SpG_34. Solution is to use non-negative least squares implemented in the "nnls" package for those. However, in some cases the model concentrations are not between the glass and titanite concentrations. This is probably because while the coefficients are constrained to be positive, they are not constrained to sum to one. The best solution would be to use nonlinear least squares regression and constrain the coefficients to be between 0 and 1 and the intercept to equal zero, but to do that in R would be messy: many different packages, some of which are dated and some immature. But the models calculated using nnls do not mass balance. I will have to use nonlinear least squares regression.
