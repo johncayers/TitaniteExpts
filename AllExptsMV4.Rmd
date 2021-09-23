@@ -8,7 +8,7 @@ output:
 bibliography: "TitaniteReferences.bib"
 ---
 
-```{r set-global, include=FALSE, echo=FALSE}
+```{r set-global, include=FALSE}
 # Suppress all error messages
 knitr::opts_chunk$set(error = FALSE)
 ```
@@ -30,7 +30,7 @@ skimr::skim(AllExpts)
 
 ### Calculate concentrations of cations
 
-```{r, echo=FALSE}
+```{r}
 Cations <- AllExpts %>%
   mutate(
     Si = SiO2/60.0848,
@@ -53,7 +53,7 @@ Cations <- AllExpts %>%
 
 ### Calculate cation fractions
 
-```{r, echo=FALSE}
+```{r}
 
 CationFractions <- Cations
 f <- match("Si", names(CationFractions))
@@ -70,7 +70,7 @@ Formula for calculating melt composition parameter M [@Ryerson1987]
 
 $$M = \frac{(Na + K + 2*Ca)}{(Si * Al)}$$
 
-```{r, echo=FALSE}
+```{r}
 CationFractions <- CationFractions %>%
   mutate(
     M = (Na + K + 2*Ca)/(Si*Al),
@@ -90,7 +90,7 @@ CationFractionsTitanite <- filter(CationFractions, Titanite == "Y")
 
 ### Correlation matrix
 
-```{r, echo=FALSE}
+```{r}
 CorrTest <- select(CationFractionsTitanite, TiO2, lnTiO2, Pkb, Ca, M:PInvTK, A_NK, A_CNK, A_C)
 cor(CorrTest)
 ```
@@ -102,28 +102,25 @@ cor(CorrTest)
 
 -   to find optimal set of parameters
 
-```{r, echo=FALSE}
+```{r}
 leaps <- regsubsets(TiO2 ~ TK + M + C + InvTK, data = CationFractionsTitanite, nbest = 2) 
 plot(leaps, scale = "adjr2")
 
 ```
 
--   M is in best model fit and C is not, so run M models first and then C, then see which model is better validated.
+-   M is in best model fit and C is not, so use M and not C.
 
 ### Scatterplot matrices
 
-```{r, echo=FALSE, results='hide'}
+```{r}
 scatterplotMatrix(~ Ti + A_CNK + InvTK + TK + C + M, data = CationFractionsTitanite, groups = CationFractionsTitanite$Source, smooth = FALSE)
-dev.copy(png,"ScatterPlotMatrixAllExpts.png")
-dev.off()   
-
 ```
 
 -   LEPR compositions show bimodal distribution for melt composition parameters M and C.
 
 ### Preliminary M model fit
 
-```{r, echo=FALSE}
+```{r}
 RegModel <- CationFractionsTitanite
 fit <- lm(TiO2 ~ M + InvTK + TK, data = RegModel)
 summary(fit)
@@ -134,38 +131,35 @@ summary(fit)
 
 ### Refined M model fit
 
-```{r, echo=FALSE, results='hide', fig.show='hide'}
+```{r, results='hide', fig.show='hide'}
 fit <- lm(TiO2 ~ M + TK, data = RegModel)
 summary(fit)
 plot(fit)
 ```
 
-```{r, echo=FALSE, results='hide', fig.show='hide'}
+```{r, results='hide'}
 DelExpts <- c("SpDis_1", "SpDis_3", "SpG_28")
 RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + TK, data = RegModel)
 summary(fit)
-plot(fit)
 ```
 
-```{r, echo=FALSE, results='hide', fig.show='hide'}
+```{r, results='hide'}
 DelExpts <- c("ASI200", "SpDis_2", "DAC")
 RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + TK, data = RegModel)
 summary(fit)
-plot(fit)
 ```
 
-```{r, echo=FALSE, results='hide', fig.show='hide'}
+```{r, results='hide'}
 DelExpts <- c("HL220-60000", "SH2Na", "SH2K")
 RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + TK, data = RegModel)
 out <- summary(fit)
 out
-plot(fit)
 ```
 
-```{r, echo=FALSE}
+```{r}
 Mcoef <- out$coefficients[2,1]
 Tcoef <- out$coefficients[3,1]
 Int <- out$coefficients[1,1]
@@ -177,7 +171,7 @@ RegModel <- RegModel %>%
 
 ### preliminary M log-log plot
 
-```{r, echo=FALSE}
+```{r}
 p <- ggplot(RegModel, aes(x = log10(TiO2), y = log10(TiO2sat), shape = Source, color = Source)) +
   geom_point() +
   geom_abline(slope = 1, intercept = 0) +
@@ -191,7 +185,7 @@ p <- ggplot(RegModel, aes(x = log10(TiO2), y = log10(TiO2sat), shape = Source, c
 
 Need to delete the two experiments with the lowest TiO2, since they don't fall on the trend and are likely below the detection limit
 
-```{r, echo=FALSE, results='hide'}
+```{r, results='hide'}
 DelExpts <- c("ND-002-18", "ND-002-20")
 RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + TK, data = RegModel)
@@ -205,7 +199,7 @@ Observations depicted as large circles may have a disproportionate influence on 
 
 ### Test of M model regression assumptions
 
-```{r, echo=FALSE}
+```{r}
 gvmodel <- gvlma(fit)
 summary(gvmodel)
 ```
@@ -214,7 +208,7 @@ All assumptions satisfied [@pena2006global]
 
 ### Calculate M model TiO2 concentrations and errors
 
-```{r, echo=FALSE}
+```{r}
 # Model output table provides standard errors; convert to standard deviation by multiplying by sqrt of n = # of samples
 n <- nrow(RegModel)
 Mcoef <- out$coefficients[2,1]
@@ -227,14 +221,14 @@ RegModel <- RegModel %>%
    TiO2sat = (Mcoef * M + Tcoef * TK + Int),
     TiO2satSD = sqrt(Mcoef^2*Mcoefsd^2 + Tcoef^2*Tcoefsd^2),
    lower = TiO2sat - TiO2satSD,
-   upper = TiO2sat + TiO2satSD
-  )
+   upper = TiO2sat + TiO2satSD,
+    )
 ```
 
 ### Plot M model TiO2 saturation concentration versus measured TiO2
 
-```{r, echo=FALSE}
-p <- ggplot(RegModel, aes(x = TiO2, y = TiO2sat, ymin = lower, ymax = upper, shape = Source, color = Source)) +
+```{r}
+p <- ggplot(data = RegModel, aes(x = TiO2, y = TiO2sat, ymin = lower, ymax = upper, shape = Source, color = Source)) +
   geom_pointrange() +
   geom_abline(slope = 1, intercept = 0) +
   theme(legend.position = "left") +
@@ -249,7 +243,7 @@ ggsave("AllExptsM_ModelFit.svg", width = 2000, height = 2*618, units = "px", plo
 
 ### final log-log plot of M model fit
 
-```{r, echo=FALSE}
+```{r}
 p <- ggplot(RegModel, aes(x = log10(TiO2), y = log10(TiO2sat), ymin = log10(lower), ymax = log10(upper), shape = Source, color = Source)) +
   geom_pointrange() +
   geom_abline(slope = 1, intercept = 0) +
@@ -262,9 +256,9 @@ print(p1)
 
 ### TiO2-M plot
 
-```{r, echo=FALSE}
+```{r}
 RegModel %>%
-ggplot(aes(x=M, y=TiO2, fill = TK)) +
+ggplot(aes(x=M, y=TiO2, fill = TC)) +
   geom_point(size = 4, shape = 22, color = "black") +
    theme_bw() +
   ylab(~paste("TiO"[2],"sat")) +
@@ -274,7 +268,7 @@ ggplot(aes(x=M, y=TiO2, fill = TK)) +
 
 ### TiO2-TK plot
 
-```{r, echo=FALSE}
+```{r}
 ggplot(RegModel, aes(x=TK, y=TiO2, color=M)) +
   geom_point()
 ```
@@ -288,11 +282,11 @@ ggplot(RegModel, aes(x=A_CNK, y=TiO2, color=TK)) +
 
 ### Model output table
 
-```{r, echo=FALSE}
-TiO2AllExptsModelTable <- select(RegModel, Source, Expt, M, TK, TiO2, TiO2sat, TiO2satSD)
+```{r}
+TiO2AllExptsModelTable <- select(RegModel, Source, Expt, TiO2, CaO, M, FM, A_CNK, A_C, TK, TiO2sat, TiO2satSD)
 write.csv(TiO2AllExptsModelTable, file = "TiO2AllExptsM_ModelTable.csv")
 DFGlassComps <- filter(RegModel, Source != "LEPR") %>%
-  select(Expt, SiO2:TiO2, M, C, A_CNK, A_NK)
+  select(Expt, SiO2:TiO2, M, FM, A_CNK, A_C)
 write.csv(DFGlassComps, file = "DFGlassCompositions.csv")
 
 ```
@@ -301,7 +295,7 @@ write.csv(DFGlassComps, file = "DFGlassCompositions.csv")
 
 Use M model equation to test whether LEPR expts without titanite or rutile are undersaturated.
 
-```{r, echo=FALSE}
+```{r}
 LEPR_Expts <- read_csv("LEPR_ExperimentsV2.csv")
 LEPRLiqs <- read_csv("LEPR_LiquidAnhyV4.csv")
 LEPR <- inner_join(LEPR_Expts, LEPRLiqs, by = "Index")
@@ -327,7 +321,7 @@ LEPRnoTitRut <- select(LEPRnoTitRut, Experiment.x, TK, SiO2, TiO2, Al2O3, FeOt, 
 
 #### Calculate concentrations of cations
 
-```{r, echo=FALSE}
+```{r}
 LEPRnoTitRutCations <- LEPRnoTitRut %>%
   mutate(
     Si = SiO2/60.0848,
@@ -345,7 +339,7 @@ LEPRnoTitRutCations <- LEPRnoTitRut %>%
 
 #### Calculate cation fractions
 
-```{r, echo=FALSE}
+```{r}
 
 LEPRnoTitRutCationFractions <- LEPRnoTitRutCations
 f <- match("Si", names(LEPRnoTitRutCationFractions))
@@ -358,7 +352,7 @@ for (i in f:l) {
 
 #### Calculate melt composition parameters
 
-```{r, echo=FALSE}
+```{r}
 LEPRnoTitRutCationFractions <- LEPRnoTitRutCationFractions %>%
   mutate(
     M = (Na + K + 2*Ca)/(Si*Al),
@@ -368,7 +362,7 @@ LEPRnoTitRutCationFractions <- LEPRnoTitRutCationFractions %>%
 
 #### Compare model and observations
 
-```{r, echo=FALSE}
+```{r}
 NoTitaniteModelM <- select(LEPRnoTitRutCationFractions, Experiment.x, TiO2, TK, M)
 NoTitaniteModelM$TiO2sat <- predict(fit, NoTitaniteModelM)
 CompareTiO2 <- select(NoTitaniteModelM, Experiment.x,  TiO2, TiO2sat)
@@ -385,7 +379,7 @@ CompareTiO2 %>%
 
 ### Save output file and display session info
 
-```{r, echo=FALSE}
+```{r}
 save.image("TitaniteAllExptsM.RData")
 sessionInfo()
 ```

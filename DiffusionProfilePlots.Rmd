@@ -26,7 +26,7 @@ for (i in seq_along(ExptList)) {
   tmp <- filter(DiffusionLong, Expt == ExptList[i])
 print(ggplot(tmp, aes(x = x, y = Value)) +
   geom_point() +
-  geom_smooth() +
+  geom_smooth(level=0.95) +
   facet_wrap(facets = vars(Oxide), scales = "free_y") +
   xlab("Distance from titanite crystal (μm)") +
   ylab("Oxide concentration (wt. %)") +
@@ -36,7 +36,7 @@ print(paste(str_c("Experiment ", ExptList[i])))
 }
 ```
 
-Create manuscript Figure 3: TiO2 raw and linearized diffusion profiles for experiment SpDis12
+Create manuscript Figure 6: TiO2 raw and linearized diffusion profiles for experiment SpDis12
 
 ```{r}
 DiffProf <- read_csv("SpDis12TiO2DiffusionProfile.csv")
