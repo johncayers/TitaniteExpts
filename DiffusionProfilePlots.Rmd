@@ -40,20 +40,21 @@ Create manuscript Figure 6: TiO2 raw and linearized diffusion profiles for exper
 
 ```{r}
 DiffProf <- read_csv("SpDis12TiO2DiffusionProfile.csv")
-print(ggplot(DiffProf, aes(x = x, y = TiO2)) +
+p <- ggplot(DiffProf, aes(x = x, y = TiO2)) +
   geom_point() +
   geom_smooth() +
   xlab("Distance from titanite crystal (μm)") +
   ylab("TiO2 concentration (wt. %)") +
   theme_bw()
-)
-print(ggplot(DiffProf, aes(x=x, y = InvTiO2)) +
+ggsave("SpDis12TiO2DiffusionProfile.png", width = 2000, height = 2*618, units = "px", plot = p)
+
+p <- ggplot(DiffProf, aes(x=x, y = InvTiO2)) +
   geom_point() +
   geom_smooth(method = lm, color = "brown", se = TRUE, level = 0.95) +
   theme_bw() +
   xlab("Distance from titanite crystal (μm)") +
   ylab(bquote(TiO[2] ~erf^{"-1"}~"(1 - Cx/C0)"))
-  )
+ggsave("SpDis12TiO2InverseErfDiffusionProfile.png", width = 2000, height = 2*618, units = "px", plot = p)
+
 ```
- ylab(bquote(~TiO[2]~))
-"(1 – "~C[x]~"/"~C[0]~")"
+

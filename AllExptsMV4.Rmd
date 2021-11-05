@@ -8,6 +8,17 @@ output:
 bibliography: "TitaniteReferences.bib"
 ---
 
+This program imports the file AllExptsV3.csv containing silicate glass compositions from:
+1. titanite growth experiments conducted at Vanderbilt University by graduate student Danny Flanagan.
+2. titanite dissolution experiments conducted at RPI by Rick Ryerson and Bruce Watson. 
+3. phase equilibrium experiments from the LEPR database [@Hirschmann2008] that produced titanite.
+Thermodynamics suggests that a titanite solubility equation should have the form:
+
+ln (TiO2)melt = -ΔH°r/RT + ΔS°r/R - ΔVr(P-1)/RT – ln γTiO2melt – k1M
+
+ln(TiO2)melt, the natural log of the concentration of TiO2 required for titanite saturation in the melt, is the dependent variable. The independent variables are 1/T, -ΔV(P-1)/T and melt composition M. Subsets regression is used to select the independent variables that produce the best model. Iterative rejection of outliers leads to a refined multiple linear regression model. The model is validated by importing data for titanite-undersaturated melts from the LEPR database (files LEPR_ExperimentsV2.csv and LEPR_LiquidAnhyV4.csv) and calculating the percent of experiments that are correctly predicted to be undersaturated in titanite. 
+
+
 ```{r set-global, include=FALSE}
 # Suppress all error messages
 knitr::opts_chunk$set(error = FALSE)
@@ -16,7 +27,7 @@ knitr::opts_chunk$set(error = FALSE)
 ```{r setup, include=FALSE}
 if (!require("pacman"))
    install.packages("pacman")
-pacman::p_load(tidyverse, car, leaps, knitr, skimr, ggExtra, gvlma)
+pacman::p_load(tidyverse, car, leaps, knitr, skimr, ggExtra, gvlma, svglite)
 
 ```
 
