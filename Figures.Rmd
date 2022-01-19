@@ -1,5 +1,5 @@
 ---
-title: "Diffusion Profiles"
+title: "Titanite solubility manuscript figures"
 author: "John C. Ayers"
 output:
   html_document:
@@ -9,19 +9,35 @@ output:
 ```{r set-global, include=FALSE, echo=FALSE}
 # Suppress all error messages
 knitr::opts_chunk$set(error = FALSE)
+library(tidyverse)
 ```
 
+Figure 1 fluorescence test
+
 ```{r}
-library(tidyverse)
-Diffusion <- read_csv("DiffusionProfilesV3.csv")
-DiffusionLong <- Diffusion %>%
+Oxides <- read_csv("FluorescenceTestV2.csv")
+OxidesLong <- Oxides %>%
   pivot_longer(c("SiO2":"TiO2"), names_to = "Oxide", values_to = "Value")
-ExptList <- unique(DiffusionLong$Expt)
+p <- ggplot(OxidesLong, aes(x = x, y = Value)) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(facets = vars(Oxide), scales = "free_y", nrow = 3) +
+  xlab("Distance from titanite crystal (μm)") +
+  ylab("Oxide concentration (wt. %)") +
+  theme_bw()
+print(p)
+ggsave("FluorescenceTest.eps", width = 2000, height = 2*618, units = "px", plot = p)
+
 ```
+
 
 Plot diffusion profiles for each dissolution experiment. Profiles for experiment SpDis13 are Figure 4 in manuscript.
 
 ```{r}
+Diffusion <- read_csv("DiffusionProfilesV3.csv")
+DiffusionLong <- Diffusion %>%
+  pivot_longer(c("SiO2":"TiO2"), names_to = "Oxide", values_to = "Value")
+ExptList <- unique(DiffusionLong$Expt)
 for (i in seq_along(ExptList)) {
   tmp <- filter(DiffusionLong, Expt == ExptList[i])
 p <- ggplot(tmp, aes(x = x, y = Value)) +
@@ -33,7 +49,7 @@ p <- ggplot(tmp, aes(x = x, y = Value)) +
   theme_bw()
 print(paste(str_c("Experiment ", ExptList[i])))
 print(p)
-ggsave(str_c("DiffProf", ExptList[i], '.png'), plot = p)
+ggsave(str_c("DiffProf", ExptList[i], '.eps'), plot = p)
 }
 ```
 
@@ -47,14 +63,16 @@ p <- ggplot(DiffProf, aes(x = x, y = TiO2)) +
   xlab("Distance from titanite crystal (μm)") +
   ylab("TiO2 concentration (wt. %)") +
   theme_bw()
+print(p)
 ggsave("SpDis12TiO2DiffusionProfile.eps", width = 2000, height = 2*618, units = "px", plot = p)
 
-p <- ggplot(DiffProf, aes(x=x, y = InvTiO2)) +
+p1 <- ggplot(DiffProf, aes(x=x, y = InvTiO2)) +
   geom_point() +
   geom_smooth(method = lm, color = "brown", se = TRUE, level = 0.95) +
   theme_bw() +
   xlab("Distance from titanite crystal (μm)") +
   ylab(bquote(TiO[2] ~erf^{"-1"}~"(1 - Cx/C0)"))
+print(p1)
 ggsave("SpDis12TiO2InverseErfDiffusionProfile.eps", width = 2000, height = 2*618, units = "px", plot = p)
 
 ```
