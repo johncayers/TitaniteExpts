@@ -290,6 +290,87 @@ CompareTiO2 %>%
   count(Model_Correct)
 
 ```
+### See how model equation fits LEPR data
+
+### Convert oxides to cation concentrations
+
+```{r}
+LEPR_Expts <- read_csv("LEPR_Titanite_ExptsV2.csv")
+LEPR_Cations <- LEPR_Expts %>%
+  mutate(
+    Si = SiO2 / 60.0848,
+    Al = 2 * Al2O3 / 101.961,
+    Na = 2 * Na2O / 61.979,
+    K = 2 * K2O / 94.194,
+    Ca = CaO / 56.0794,
+    Fe = FeO / 71.8464,
+    Mg = MgO / 40.3044,
+    Ti = TiO2 / 79.8988,
+    CationSum = (Si + Al + Na + K + Ca + Fe + Mg + Ti)
+  )
+```
+
+### Calculate cation fractions
+
+```{r}
+
+LEPRCationFractions <- select(LEPR_Cations, Expt, TC, TiO2, Si:CationSum)
+f <- match("Si", names(LEPRCationFractions))
+l <- match("Ti", names(LEPRCationFractions))
+for (i in f:l) {
+  LEPRCationFractions[(i)] <- LEPRCationFractions[(i)] / LEPRCationFractions$CationSum
+}
+```
+
+
+```{r}
+
+LEPRCationFractions <- LEPRCationFractions %>%
+  mutate(
+    M = (Na + K + 2 * Ca) / (Si * Al),
+    TK = TC + 273.15,
+          )
+```
+
+```{r}
+RegModel <- select(LEPRCationFractions, Expt, TiO2, TK, M)
+RegModel <- RegModel %>%
+  mutate(
+    TiO2sat = (out$coefficients[2,1] * M + out$coefficients[3,1] * TK + out$coefficients[1,1]),
+    TiO2satSD = TiO2sat * sqrt((out$coefficients[2,2]/ out$coefficients[2,1])^2 + (out$coefficients[3,2] / out$coefficients[3,1])^2),
+    lower = TiO2sat - TiO2satSD,
+    upper = TiO2sat + TiO2satSD
+  )
+```
+
+### Plot model versus measured TiO2
+
+```{r}
+fitparams <- c(out$coefficients[1,1], out$coefficients[2,1],  out$coefficients[3,1])
+fitparams <- round(fitparams, digits = 2)
+p <- ggplot(RegModel, aes(x = TiO2, y = TiO2sat, ymin = lower, ymax = upper)) +
+  geom_pointrange() +
+  geom_abline(slope = 1, intercept = 0) 
+# add marginal distributions
+# p1 <- ggMarginal(p, type = "histogram")
+print(p)
+
+```
+
+### Statistics
+
+```{r}
+fit <- lm(TiO2sat ~ TiO2, data = RegModel)
+summary(fit)
+```
+
+### Model output table
+
+```{r}
+TiO2ModelTable <- select(RegModel, Expt, M, TK, TiO2, TiO2sat,TiO2satSD)
+kable(TiO2ModelTable, digits = 2, format = "html",
+             col.names = c("Expt.", "M", "T(K)", "TiO~2~", "TiO~2,sat~", "1$\\sigma$"))
+```
 
 ### Save output file and display session info
 

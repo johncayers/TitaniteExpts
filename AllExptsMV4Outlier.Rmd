@@ -22,7 +22,7 @@ knitr::opts_chunk$set(error = FALSE)
 ```{r setup, include=FALSE}
 if (!require("pacman"))
    install.packages("pacman")
-pacman::p_load(tidyverse, car, leaps, knitr, skimr, ggExtra, gvlma)
+pacman::p_load(tidyverse, car, leaps, knitr, skimr, ggExtra, gvlma, svglite)
 
 ```
 
@@ -92,8 +92,6 @@ CationFractions <- CationFractions %>%
 # Filter out experiments with no titanite in run products glasses
 CationFractionsNoTitanite <- filter(CationFractions, Titanite == "N")
 CationFractionsTitanite <- filter(CationFractions, Titanite == "Y")
-write.csv(CationFractionsTitanite, file = "TiO2AllExptsM_Table.csv")
-
 ```
 
 ### Correlation matrix
@@ -142,34 +140,46 @@ summary(fit)
 ```{r}
 fit <- lm(TiO2 ~ M + TK, data = RegModel)
 summary(fit)
-plot(fit)
+car::outlierTest(fit)
+
 ```
 
-The numbers labeling the outliers correspond to the row numbers of the outlier experiments. At each step I delete all three, refit the model, and then use the plots to identify the next set of three outliers.
+Outliers identified using Bonferroni p-values for testing each observation in turn to be a mean-shift outlier, based Studentized residuals in linear (t-tests) model. Outliers have Bonferroni p < 0.05. Row numbers of the outliers are returned. Those experiments are deleted and the model rerun and tested for outliers.
 
 ```{r}
-DelExpts <- c("SpDis_1", "SpDis_3", "SpG_28")
+DelExpts <- c("SpDis_1", "SpDis_3")
 RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + TK, data = RegModel)
-summary(fit)
-plot(fit)
-```
+car::outlierTest(fit)
 
-```{r}
-DelExpts <- c("ASI200", "SpDis_2", "DAC")
-RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
-fit <- lm(TiO2 ~ M + TK, data = RegModel)
-summary(fit)
-plot(fit)
 ```
 
 ```{r}
-DelExpts <- c("HL220-60000", "SH2Na", "SH2K")
+DelExpts <- c("SpDis_2")
 RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + TK, data = RegModel)
+car::outlierTest(fit)
+
+```
+
+```{r}
+DelExpts <- c("ASI200")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + TK, data = RegModel)
+car::outlierTest(fit)
+
+```
+
+No remaining experiments have Bonferroni p < 0.05. 
+
+```{r}
 out <- summary(fit)
 out
+plot(fit)
+
 ```
+
+
 
 ```{r}
 Mcoef <- out$coefficients[2,1]
@@ -190,7 +200,7 @@ p <- ggplot(RegModel, aes(x = log10(TiO2), y = log10(TiO2sat), shape = Source, c
   theme(legend.position = "left") +
   ylab(~paste("log"[10], "TiO"[2],"sat")) +
   xlab(~paste("log"[10], "TiO"[2],"meas"))
-
+print(p)
 ```
 
 ### Final M model fit
@@ -240,11 +250,8 @@ RegModel <- RegModel %>%
 ### Plot M model TiO2 saturation concentration versus measured TiO2
 
 ```{r}
-safe_colorblind_palette <- c("#88CCEE", "#CC6677", "#DDCC77", "#117733", "#332288", "#AA4499", "#44AA99", "#999933", "#882255", "#661100", "#6699CC", "#888888", "#0072B2", "#D55E00")
 p <- ggplot(data = RegModel, aes(x = TiO2, y = TiO2sat, ymin = lower, ymax = upper, shape = Source, color = Source)) +
   geom_pointrange() +
-  scale_color_manual(values=safe_colorblind_palette) +
-  theme_bw() +
   geom_abline(slope = 1, intercept = 0) +
   theme(legend.position = "left") +
   ylab(~paste("TiO"[2],"sat")) +
@@ -262,7 +269,7 @@ p <- ggplot(RegModel, aes(x = log10(TiO2), y = log10(TiO2sat), ymin = log10(lowe
   geom_pointrange() +
    scale_shape_manual(values=c(0, 1, 2)) +
   theme_bw() +
-  scale_color_manual(values=safe_colorblind_palette) +
+   scale_color_brewer(palette = "Set2") +
   geom_abline(slope = 1, intercept = 0) +
   theme(legend.position = "left") +
   ylab(~paste("log"[10], "TiO"[2],"sat")) +
@@ -290,9 +297,9 @@ ggsave("Fig7.png", width = 2000, height = 2*618, units = "px", plot = p)
 
 ```{r}
 p <- ggplot(RegModel, aes(x=TC, y=TiO2, shape = Source, color = Source)) +
-  geom_point(size = 2, stroke = 1) +
+  geom_point(size = 2) +
   scale_shape_manual(values=c(0, 1, 2)) +
-  scale_color_manual(values=safe_colorblind_palette) +
+    scale_color_brewer(palette = "Set2") +
   ylab(~paste("TiO"[2]," (wt. %)")) +
   xlab("Temperature (°C)") +
    theme_bw()
@@ -304,9 +311,9 @@ ggsave("Fig6a.eps", width = 2000, height = 2*618, units = "px", plot = p)
 
 ```{r}
 p <- ggplot(RegModel, aes(x=M, y=TiO2, shape = Source, color = Source)) +
-  geom_point(size = 2, stroke = 1) +
+  geom_point(size = 2) +
   scale_shape_manual(values=c(0, 1, 2)) +
-  scale_color_manual(values=safe_colorblind_palette) +
+   scale_color_brewer(palette = "Set2") +
   ylab(~paste("TiO"[2]," (wt. %)")) +
   xlab("M") +
    theme_bw()
