@@ -190,7 +190,7 @@ p <- ggplot(RegModel, aes(x = log10(TiO2), y = log10(TiO2sat), shape = Source, c
   theme(legend.position = "left") +
   ylab(~paste("log"[10], "TiO"[2],"sat")) +
   xlab(~paste("log"[10], "TiO"[2],"meas"))
-
+print(p)
 ```
 
 ### Final M model fit
