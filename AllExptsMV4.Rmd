@@ -148,7 +148,7 @@ plot(fit)
 The numbers labeling the outliers correspond to the row numbers of the outlier experiments. At each step I delete all three, refit the model, and then use the plots to identify the next set of three outliers.
 
 ```{r}
-DelExpts <- c("SpDis_1", "SpDis_3", "SpG_28")
+DelExpts <- c("SpD_1", "SpD_3", "SpG_28")
 RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + TK, data = RegModel)
 summary(fit)
@@ -156,7 +156,7 @@ plot(fit)
 ```
 
 ```{r}
-DelExpts <- c("ASI200", "SpDis_2", "DAC")
+DelExpts <- c("ASI200", "SpD_2", "DAC")
 RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
 fit <- lm(TiO2 ~ M + TK, data = RegModel)
 summary(fit)
