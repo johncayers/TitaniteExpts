@@ -1,0 +1,398 @@
+---
+title: 'Titanite solubility: Flanagan + LEPR experiments'
+author: "John C. Ayers"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+bibliography: "TitaniteReferences.bib"
+---
+
+This program imports the file AllExptsV3.csv containing silicate glass compositions from:
+1. titanite growth experiments conducted at Vanderbilt University by graduate student Danny Flanagan.
+2. titanite dissolution experiments conducted at RPI by Rick Ryerson and Bruce Watson. 
+3. phase equilibrium experiments from the LEPR database [@Hirschmann2008] that produced titanite.
+Thermodynamics suggests that a titanite solubility equation should have the form:
+
+ln (TiO2)melt = -ΔH°r/RT + ΔS°r/R - ΔVr(P-1)/RT – ln γTiO2melt – k1M
+
+ln(TiO2)melt, the natural log of the concentration of TiO2 required for titanite saturation in the melt, is the dependent variable. The independent variables are 1/T, -ΔV(P-1)/T and melt composition M. Subsets regression is used to select the independent variables that produce the best model. Iterative rejection of outliers leads to a refined multiple linear regression model. The model is validated by importing data for titanite-undersaturated melts from the LEPR database (files LEPR_ExperimentsV2.csv and LEPR_LiquidAnhyV4.csv) and calculating the percent of experiments that are correctly predicted to be undersaturated in titanite. 
+
+
+```{r set-global, include=FALSE}
+# Suppress all error messages
+knitr::opts_chunk$set(error = FALSE)
+```
+
+```{r setup, include=FALSE}
+if (!require("pacman"))
+   install.packages("pacman")
+pacman::p_load(tidyverse, car, leaps, knitr, skimr, ggExtra, gvlma, svglite)
+
+```
+
+### Input data
+
+```{r}
+AllExpts <- read_csv("AllExptsV3.csv")
+# Contains 32 of 39 DF experiments
+skimr::skim(AllExpts)
+```
+
+### Calculate concentrations of cations
+
+```{r}
+Cations <- AllExpts %>%
+  mutate(
+    Si = SiO2/60.0848,
+    Al = 2*Al2O3/101.961,
+    Na = 2*Na2O/61.979,
+    K = 2*K2O/94.194,
+    Ca = CaO/56.0794,
+    Fe = FeO/71.8464,
+    Mg = MgO/40.3044,
+    Ti = TiO2/79.8988,
+    eCa = (CaO/56.0794 - Al2O3/101.961 + K2O/94.194 + Na2O/61.979),
+    CationSum = (Si + Al + Na + K + Ca + Fe + Mg + Ti),
+    lnTiO2 = log(TiO2),
+    Al2O3m = Al2O3/101.961,
+    Na2Om = Na2O/61.979,
+    K2Om = K2O/94.194,
+    CaOm = CaO/56.0794
+     )
+```
+
+### Calculate cation fractions
+
+```{r}
+
+CationFractions <- Cations
+f <- match("Si", names(CationFractions))
+l <- match("Ti", names(CationFractions))
+for (i in f:l) {
+  CationFractions[(i)] = CationFractions[(i)]/CationFractions$CationSum
+}
+
+```
+
+### Calculate melt composition parameters
+
+Formula for calculating melt composition parameter M [@Ryerson1987]
+
+$$M = \frac{(Na + K + 2*Ca)}{(Si * Al)}$$
+
+```{r}
+CationFractions <- CationFractions %>%
+  mutate(
+    M = (Na + K + 2*Ca)/(Si*Al),
+    FM = (Na + K + 2*(Ca + Fe + Mg))/(Si*Al),
+    C = (10*eCa)/(Si*Al),
+    A_CNK = Al2O3m/(CaOm + Na2Om + K2Om),
+    A_NK = Al2O3m/(Na2Om + K2Om),
+    A_C = Al2O3m/CaOm,
+    TK = TC+273.15,
+    InvTK = 1/TK,
+    PInvTK = (Pkb*1000 - 1)*InvTK
+    )
+# Filter out experiments with no titanite in run products glasses
+CationFractionsNoTitanite <- filter(CationFractions, Titanite == "N")
+CationFractionsTitanite <- filter(CationFractions, Titanite == "Y")
+```
+
+### Correlation matrix
+
+```{r}
+CorrTest <- select(CationFractionsTitanite, TiO2, lnTiO2, Pkb, Ca, M:PInvTK, A_NK, A_CNK, A_C)
+cor(CorrTest)
+```
+
+-   FM parameter does not correlate as well as M or C, so drop FM.
+-   Pkb and PInvTK show poor correlations, so drop from model.
+
+### Subsets regression
+
+-   to find optimal set of parameters
+
+```{r}
+leaps <- regsubsets(TiO2 ~ TK + M + C + InvTK, data = CationFractionsTitanite, nbest = 2) 
+plot(leaps, scale = "adjr2")
+
+```
+
+-   M is in best model fit and C is not, so use M and not C.
+
+### Scatterplot matrices
+
+```{r}
+scatterplotMatrix(~ Ti + A_CNK + InvTK + TK + C + M, data = CationFractionsTitanite, groups = CationFractionsTitanite$Source, smooth = FALSE)
+```
+
+-   LEPR compositions show bimodal distribution for melt composition parameters M and C.
+
+### Preliminary M model fit
+
+```{r}
+RegModel <- CationFractionsTitanite
+fit <- lm(TiO2 ~ M + InvTK + TK, data = RegModel)
+summary(fit)
+
+```
+
+-   TK fits better than InvTK, so drop InvTK
+
+### Refined M model fit
+
+```{r, results='hide', fig.show='hide'}
+fit <- lm(TiO2 ~ M + TK, data = RegModel)
+summary(fit)
+plot(fit)
+```
+
+```{r, results='hide'}
+DelExpts <- c("SpDis_1", "SpDis_3", "SpG_28")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + TK, data = RegModel)
+summary(fit)
+```
+
+```{r, results='hide'}
+DelExpts <- c("ASI200", "SpDis_2", "DAC")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + TK, data = RegModel)
+summary(fit)
+```
+
+```{r, results='hide'}
+DelExpts <- c("HL220-60000", "SH2Na", "SH2K")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + TK, data = RegModel)
+out <- summary(fit)
+out
+```
+
+```{r}
+Mcoef <- out$coefficients[2,1]
+Tcoef <- out$coefficients[3,1]
+Int <- out$coefficients[1,1]
+RegModel <- RegModel %>%
+  mutate(
+   TiO2sat = (Mcoef * M + Tcoef * TK + Int)
+      )
+```
+
+### preliminary M log-log plot
+
+```{r}
+p <- ggplot(RegModel, aes(x = log10(TiO2), y = log10(TiO2sat), shape = Source, color = Source)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0) +
+  theme(legend.position = "left") +
+  ylab(~paste("log"[10], "TiO"[2],"sat")) +
+  xlab(~paste("log"[10], "TiO"[2],"meas"))
+
+```
+
+### Final M model fit
+
+Need to delete the two experiments with the lowest TiO2, since they don't fall on the trend and are likely below the detection limit
+
+```{r, results='hide'}
+DelExpts <- c("ND-002-18", "ND-002-20")
+RegModel <- filter(RegModel, !(Expt %in%  DelExpts))
+fit <- lm(TiO2 ~ M + TK, data = RegModel)
+out <- summary(fit)
+plot(fit)
+influencePlot(fit, main="Influence Plot", sub="Circle size is proportional to Cook's distance")
+
+```
+
+Observations depicted as large circles may have a disproportionate influence on the parameter estimates of the model. Points with Hat values above 0.2 have high leverage.
+
+### Test of M model regression assumptions
+
+```{r}
+gvmodel <- gvlma(fit)
+summary(gvmodel)
+```
+
+All assumptions satisfied [@pena2006global]
+
+### Calculate M model TiO2 concentrations and errors
+
+```{r}
+# Model output table provides standard errors; convert to standard deviation by multiplying by sqrt of n = # of samples
+n <- nrow(RegModel)
+Mcoef <- out$coefficients[2,1]
+Mcoefsd <- out$coefficients[2,2]*sqrt(n)
+Tcoef <- out$coefficients[3,1]
+Tcoefsd <- out$coefficients[3,2]*sqrt(n)
+Int <- out$coefficients[1,1]
+RegModel <- RegModel %>%
+  mutate(
+   TiO2sat = (Mcoef * M + Tcoef * TK + Int),
+    TiO2satSD = sqrt(Mcoef^2*Mcoefsd^2 + Tcoef^2*Tcoefsd^2),
+   lower = TiO2sat - TiO2satSD,
+   upper = TiO2sat + TiO2satSD,
+    )
+```
+
+### Plot M model TiO2 saturation concentration versus measured TiO2
+
+```{r}
+p <- ggplot(data = RegModel, aes(x = TiO2, y = TiO2sat, ymin = lower, ymax = upper, shape = Source, color = Source)) +
+  geom_pointrange() +
+  geom_abline(slope = 1, intercept = 0) +
+  theme(legend.position = "left") +
+  ylab(~paste("TiO"[2],"sat")) +
+  xlab(~paste("TiO"[2],"meas"))
+# add marginal distributions
+p1 <- ggMarginal(p, type = "histogram")
+print(p1)
+ggsave("AllExptsM_ModelFit.svg", width = 2000, height = 2*618, units = "px", plot = p1)
+
+```
+
+### final log-log plot of M model fit
+
+```{r}
+p <- ggplot(RegModel, aes(x = log10(TiO2), y = log10(TiO2sat), ymin = log10(lower), ymax = log10(upper), shape = Source, color = Source)) +
+  geom_pointrange() +
+  geom_abline(slope = 1, intercept = 0) +
+  theme(legend.position = "left") +
+  ylab(~paste("log"[10], "TiO"[2],"sat")) +
+  xlab(~paste("log"[10], "TiO"[2],"meas"))
+p1 <- ggMarginal(p, type = "histogram")
+print(p1)
+```
+
+### TiO2-M plot
+
+```{r}
+RegModel %>%
+ggplot(aes(x=M, y=TiO2, fill = TC)) +
+  geom_point(size = 4, shape = 22, color = "black") +
+   theme_bw() +
+  ylab(~paste("TiO"[2],"sat")) +
+ scale_fill_gradientn(colours = c("darkred", "orange", "yellow", "white"))
+  
+```
+
+### TiO2-TK plot
+
+```{r}
+ggplot(RegModel, aes(x=TK, y=TiO2, color=M)) +
+  geom_point()
+```
+
+### TiO2 - A/CNK plot
+
+```{r}
+ggplot(RegModel, aes(x=A_CNK, y=TiO2, color=TK)) +
+  geom_point()
+```
+
+### Model output table
+
+```{r}
+TiO2AllExptsModelTable <- select(RegModel, Source, Expt, TiO2, CaO, M, FM, A_CNK, A_C, TK, TiO2sat, TiO2satSD)
+write.csv(TiO2AllExptsModelTable, file = "TiO2AllExptsM_ModelTable.csv")
+DFGlassComps <- filter(RegModel, Source != "LEPR") %>%
+  select(Expt, SiO2:TiO2, M, FM, A_CNK, A_C)
+write.csv(DFGlassComps, file = "DFGlassCompositions.csv")
+
+```
+
+### M model titanite saturation test
+
+Use M model equation to test whether LEPR expts without titanite or rutile are undersaturated.
+
+```{r}
+LEPR_Expts <- read_csv("LEPR_ExperimentsV2.csv")
+LEPRLiqs <- read_csv("LEPR_LiquidAnhyV4.csv")
+LEPR <- inner_join(LEPR_Expts, LEPRLiqs, by = "Index")
+LEPRnoTitRut <- filter(LEPR, !(grepl("tit|rut", Phases))) %>%
+  mutate(
+    FeOt = FeO + (2*71.85*Fe2O3)/159.69,
+    TK = T_C + 273.15,
+    Tot = SiO2 + TiO2 + Al2O3 + FeOt + MgO + CaO + Na2O + K2O) %>%
+  filter(Tot > 90)
+LEPRnoTitRut <- select(LEPRnoTitRut, Experiment.x, TK, SiO2, TiO2, Al2O3, FeOt, MgO, CaO, Na2O, K2O, Tot)   %>%
+  mutate(
+    SiO2 = 100*SiO2/Tot,
+    TiO2 = 100*TiO2/Tot,
+    Al2O3 = 100*Al2O3/Tot,
+    FeOt = 100*FeOt/Tot,
+    MgO = 100*MgO/Tot,
+    CaO = 100*CaO/Tot,
+    Na2O = 100*Na2O/Tot,
+    K2O = 100*K2O/Tot,
+    Tot = SiO2 + TiO2 + Al2O3 + FeOt + MgO + CaO + Na2O + K2O
+  )
+```
+
+#### Calculate concentrations of cations
+
+```{r}
+LEPRnoTitRutCations <- LEPRnoTitRut %>%
+  mutate(
+    Si = SiO2/60.0848,
+    Al = 2*Al2O3/101.961,
+    Na = 2*Na2O/61.979,
+    K = 2*K2O/94.194,
+    Ca = CaO/56.0794,
+    Fe = FeOt/71.8464,
+    Mg = MgO/40.3044,
+    Ti = TiO2/79.8988,
+    eCa = (CaO/56.0794 - Al2O3/101.961 + K2O/94.194 + Na2O/61.979),
+    CationSum = (Si + Al + Na + K + Ca + Fe + Mg + Ti)
+     )
+```
+
+#### Calculate cation fractions
+
+```{r}
+
+LEPRnoTitRutCationFractions <- LEPRnoTitRutCations
+f <- match("Si", names(LEPRnoTitRutCationFractions))
+l <- match("Ti", names(LEPRnoTitRutCationFractions))
+for (i in f:l) {
+  LEPRnoTitRutCationFractions[(i)] = LEPRnoTitRutCationFractions[(i)]/LEPRnoTitRutCationFractions$CationSum
+}
+
+```
+
+#### Calculate melt composition parameters
+
+```{r}
+LEPRnoTitRutCationFractions <- LEPRnoTitRutCationFractions %>%
+  mutate(
+    M = (Na + K + 2*Ca)/(Si*Al),
+    C = (10*eCa)/(Si*Al),
+    )
+```
+
+#### Compare model and observations
+
+```{r}
+NoTitaniteModelM <- select(LEPRnoTitRutCationFractions, Experiment.x, TiO2, TK, M)
+NoTitaniteModelM$TiO2sat <- predict(fit, NoTitaniteModelM)
+CompareTiO2 <- select(NoTitaniteModelM, Experiment.x,  TiO2, TiO2sat)
+CompareTiO2 <- CompareTiO2 %>%
+  mutate(
+    Model_Correct = if_else(TiO2sat > TiO2, "true", "false")
+  )
+CompareTiO2
+CompareTiO2 %>%
+  count(Model_Correct)
+```
+
+-   M model correctly predicts undersaturation in 95% of experiments.
+
+### Save output file and display session info
+
+```{r}
+save.image("TitaniteAllExptsM.RData")
+sessionInfo()
+```
+
+### References

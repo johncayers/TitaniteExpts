@@ -3,4 +3,6 @@
 *.RData
 *.Ruserdata
 *.png
+*.eps
 .Rproj.user
+DiffProfSpDis10.eps
